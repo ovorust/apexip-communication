@@ -1,0 +1,79 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const axios = require('axios');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Configuração do Nodemailer
+const transporter = nodemailer.createTransport({
+    host: "smtp.hostinger.com",
+    port: 465,
+    auth: {
+        user: "teste@apexipartners.com", // Seu usuário SMTP
+        pass: "Apex@123", // Sua senha SMTP
+    },
+});
+
+// Middleware
+app.use(bodyParser.json());
+
+app.post('/webhook', async (req, res) => {
+  // Ajuste para ler diretamente da estrutura do payload fornecida
+  const contactId = req.body.New.ContactId;
+  const stageId = req.body.New.StageId;
+
+  try {
+    // Requisição para obter o e-mail do contato
+    const contactInfo = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Id eq ${contactId}&$select=Email`, {
+      headers: {
+        'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+      }
+    });
+
+    // Requisição para obter o nome do estágio
+    const stageInfo = await axios.get(`https://api2.ploomes.com/Deals@Stages?$filter=Id eq ${stageId}&$select=Name`, {
+      headers: {
+        'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+      }
+    });
+
+    if (contactInfo.data && contactInfo.data.value && contactInfo.data.value.length > 0 && stageInfo.data && stageInfo.data.value && stageInfo.data.value.length > 0) {
+      const email = contactInfo.data.value[0].Email;
+      const stageName = stageInfo.data.value[0].Name;
+
+      if (email && stageName) {
+        // Configuração da mensagem de e-mail
+        const mailOptions = {
+          from: 'seuemail@gmail.com',
+          to: email,
+          subject: 'Atualização no Processo',
+          text: `Este é um exemplo de mensagem enviada após uma atualização. Seu estágio atual é: ${stageName}.`
+        };
+
+        // Enviar e-mail
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.log(error);
+            res.status(500).send('Erro ao enviar e-mail');
+          } else {
+            console.log('E-mail enviado: ' + info.response);
+            res.status(200).send('E-mail enviado com sucesso');
+          }
+        });
+      } else {
+        res.status(404).send('Informações necessárias para o e-mail não encontradas.');
+      }
+    } else {
+      res.status(404).send('Contato ou estágio não encontrado.');
+    }
+  } catch (error) {
+    console.error('Erro ao buscar informações:', error);
+    res.status(500).send('Erro ao processar a requisição');
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
+});

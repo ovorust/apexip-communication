@@ -1,0 +1,76 @@
+{
+    "AccountId": 1003788,
+    "Action": "Update",
+    "ActionUserId": 50004631,
+    "Entity": "Deals",
+    "New": {
+    "Amount": 0,
+    "ContactId": 501088506,
+    "ContactName": "Empresa Teste",
+    "CreateDate": "2024-02-19T18:49:10.143",
+    "CreatorId": 50004631,
+    "CurrencyId": 1,
+    "DaysInStage": 0,
+    "HasScheduledTasks": false,
+    "HoursInStage": 0,
+    "Id": 501072275,
+    "IsLastQuoteApproved": true,
+    "LastUpdateDate": "2024-02-20T14:21:17.14",
+    "Length": 1,
+    "OriginId": 50003562,
+    "OwnerId": 50004631,
+    "PersonId": 501088502,
+    "PersonName": "Pessoa Teste",
+    "PipelineId": 50000676,
+    "Read": true,
+    "StageId": 50003844,
+    "StartAmount": 0,
+    "StartCurrencyId": 1,
+    "StartDate": "2024-02-19T00:00:00",
+    "StatusId": 1,
+    "Tags": [
+    {
+    "TagId": 10041249
+    }
+    ],
+    "TasksOrdination": 2,
+    "Title": "Teste",
+    "UpdaterId": 50004631
+    },
+    "Old": {
+    "Amount": 0,
+    "ContactId": 501088506,
+    "ContactName": "Empresa Teste",
+    "CreateDate": "2024-02-19T18:49:10.143",
+    "CreatorId": 50004631,
+    "CurrencyId": 1,
+    "DaysInStage": 0,
+    "HasScheduledTasks": false,
+    "HoursInStage": 3,
+    "Id": 501072275,
+    "IsLastQuoteApproved": true,
+    "LastUpdateDate": "2024-02-20T11:07:59.95",
+    "Length": 1,
+    "OriginId": 50003562,
+    "OwnerId": 50004631,
+    "PersonId": 501088502,
+    "PersonName": "Pessoa Teste",
+    "PipelineId": 50000676,
+    "Read": true,
+    "StageId": 50003845,
+    "StartAmount": 0,
+    "StartCurrencyId": 1,
+    "StartDate": "2024-02-19T00:00:00",
+    "StatusId": 1,
+    "Tags": [
+    {
+    "TagId": 10041249
+    }
+    ],
+    "TasksOrdination": 2,
+    "Title": "Teste",
+    "UpdaterId": 50004631
+    },
+    "WebhookCreatorId": 50004632,
+    "WebhookId": 50001877
+    }
