@@ -1,3 +1,4 @@
+require('dotenv').config();
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 const axios = require('axios'); // Importar o módulo Axios
@@ -28,7 +29,7 @@ function enviarEmail(email, clientId, dealStatusId, dealTitle, contactName) {
   // Faz a solicitação para a API Ploomes
   axios.get(`https://api2.ploomes.com/Deals@Stages?$filter=Id eq ${dealStatusId}`, {
     headers: {
-      'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E',
+      'User-Key': process.env.PLOOMES_USER_KEY,
       'Content-Type': 'application/json'
     }
   })
