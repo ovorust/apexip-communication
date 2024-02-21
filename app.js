@@ -49,7 +49,6 @@ app.post('/webhook', async (req, res) => {
 
     if (contactInfo.data && contactInfo.data.value && contactInfo.data.value.length > 0 && stageInfo.data && stageInfo.data.value && stageInfo.data.value.length > 0) {
       const email = contactInfo.data.value[0].Email;
-      const contactName = contactInfo.data.value[0].Name;
       const stageName = stageInfo.data.value[0].Name;
 
 
