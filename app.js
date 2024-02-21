@@ -20,11 +20,17 @@ const transporter = nodemailer.createTransport({
 app.use(bodyParser.json());
 
 app.post('/webhook', async (req, res) => {
-  // Ajuste para ler diretamente da estrutura do payload fornecida
-  const contactId = req.body.New.ContactId;
-  const stageId = req.body.New.StageId;
-
   try {
+    const contactId = req.body.New.ContactId;
+    const stageId = req.body.New.StageId;
+    const contactName = req.body.New.ContactName;
+    const dealTitle = req.body.New.Title;
+
+
+    if (!contactId || !stageId) {
+      throw new Error('Contact ID or Stage ID not found in the request payload.');
+    }
+
     // Requisição para obter o e-mail do contato
     const contactInfo = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Id eq ${contactId}&$select=Email`, {
       headers: {
@@ -39,38 +45,49 @@ app.post('/webhook', async (req, res) => {
       }
     });
 
+    
+
     if (contactInfo.data && contactInfo.data.value && contactInfo.data.value.length > 0 && stageInfo.data && stageInfo.data.value && stageInfo.data.value.length > 0) {
       const email = contactInfo.data.value[0].Email;
+      const contactName = contactInfo.data.value[0].Name;
       const stageName = stageInfo.data.value[0].Name;
+
 
       if (email && stageName) {
         // Configuração da mensagem de e-mail
         const mailOptions = {
-          from: 'seuemail@gmail.com',
+          from: '"Apex Propriedade Intelectual" <teste@apexipartners.com>',
           to: email,
-          subject: 'Atualização no Processo',
-          text: `Este é um exemplo de mensagem enviada após uma atualização. Seu estágio atual é: ${stageName}.`
+          subject: 'Atualização de Status do Serviço',
+          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageName}".\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
+          html: `
+            <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
+              <p>Olá, <strong>${contactName}</strong></p>
+              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageName}".</strong></p>
+              <p style="font-size: 16px;">Atenciosamente,<br>Equipe da Apex Propriedade Intelectual</p>
+            </div>
+          `,
         };
 
         // Enviar e-mail
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
             console.log(error);
-            res.status(500).send('Erro ao enviar e-mail');
+            return res.status(500).send('Erro ao enviar e-mail');
           } else {
             console.log('E-mail enviado: ' + info.response);
-            res.status(200).send('E-mail enviado com sucesso');
+            return res.status(200).send('E-mail enviado com sucesso');
           }
         });
       } else {
-        res.status(404).send('Informações necessárias para o e-mail não encontradas.');
+        throw new Error('Email or stage name not found in the response data.');
       }
     } else {
-      res.status(404).send('Contato ou estágio não encontrado.');
+      throw new Error('Contact or stage information not found in the response data.');
     }
   } catch (error) {
-    console.error('Erro ao buscar informações:', error);
-    res.status(500).send('Erro ao processar a requisição');
+    console.error('Erro ao processar a requisição:', error.message);
+    return res.status(500).send('Erro ao processar a requisição');
   }
 });
 
