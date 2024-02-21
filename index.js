@@ -59,8 +59,17 @@ function enviarEmail(email, clientId, dealStatusId, dealTitle, contactName) {
         console.log(`E-mail enviado para: ${email}`);
         // Após o envio do e-mail, remover apenas o cliente específico
         ref.child(clientId).remove()
-          .then(() => console.log(`Cliente ${clientId} removido com sucesso.`))
-          .catch((error) => console.error('Erro ao remover cliente:', error));
+        .then(() => console.log(`Cliente ${clientId} removido com sucesso.`))
+        .catch((error) => console.error('Erro ao remover cliente:', error))
+        .finally(() => {
+          // Verifica se o nó "/clientes" está vazio e, em caso afirmativo, adiciona um marcador
+          ref.once('value', (snapshot) => {
+            if (snapshot.numChildren() === 0) {
+              ref.set('');
+            }
+          });
+        });
+
       })
       .catch((error) => console.error('Erro ao enviar e-mail:', error));
   })
