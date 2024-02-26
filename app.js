@@ -75,7 +75,7 @@ app.post('/webhook', async (req, res) => {
         "flow": "Notificação de atualização no estado do serviço"
       }
   
-      axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
+      await axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
       .then((response) => {
         console.log('Response:', response.data);
       })
