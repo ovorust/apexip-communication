@@ -25,6 +25,7 @@ app.post('/webhook', async (req, res) => {
     const contactId = req.body.New.ContactId;
     const stageId = req.body.New.StageId;
     const contactName = req.body.New.ContactName;
+    const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
 
