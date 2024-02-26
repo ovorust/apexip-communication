@@ -28,7 +28,8 @@ app.post('/webhook', async (req, res) => {
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.pipelineId;
 
-    if (pipelineId !== 50000676) {
+    if (pipelineId != 50000676) {
+      console.log('Pipeline diferente')
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
     
