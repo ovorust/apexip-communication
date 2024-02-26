@@ -93,12 +93,12 @@ app.post('/webhook', async (req, res) => {
         const mailOptions = {
           from: '"Apex Propriedade Intelectual" <teste@apexipartners.com>',
           to: email,
-          subject: 'Notificação de Serviço Apex',
-          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" foi ganho!".\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
+          subject: 'Atualização de Status do Serviço',
+          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageTitle}".\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
           html: `
             <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
               <p>Olá, <strong>${contactName}</strong></p>
-              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" foi ganho!.</strong></p>
+              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageTitle}".</strong></p>
               <p style="font-size: 16px;">Atenciosamente,<br>Equipe da Apex Propriedade Intelectual</p>
             </div>
           `,
