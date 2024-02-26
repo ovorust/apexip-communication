@@ -26,6 +26,12 @@ app.post('/webhook', async (req, res) => {
     const stageId = req.body.New.StageId;
     const contactName = req.body.New.ContactName;
     const dealTitle = req.body.New.Title;
+    const pipelineId = req.body.New.pipelineId;
+
+    if (pipelineId !== 50000676) {
+      return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
+    }
+    
 
 
     if (!contactId || !stageId) {
@@ -33,7 +39,7 @@ app.post('/webhook', async (req, res) => {
     }
 
     // Requisição para obter o e-mail do contato
-    const contactInfo = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Id eq ${contactId}&$select=Email`, {
+    const contactInfo = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Id eq ${contactId}&$expand=Phones&$orderby=TypeId desc`, {
       headers: {
         'User-Key': process.env.PLOOMES_USER_KEY
       }
@@ -49,8 +55,40 @@ app.post('/webhook', async (req, res) => {
     
 
     if (contactInfo.data && contactInfo.data.value && contactInfo.data.value.length > 0 && stageInfo.data && stageInfo.data.value && stageInfo.data.value.length > 0) {
+
+      
       const email = contactInfo.data.value[0].Email;
       const stageName = stageInfo.data.value[0].Name;
+
+      let phone = contactInfo.data.value[0]?.Phones[0]?.PhoneNumber;
+
+      if (phone.startsWith('(')) {
+        // Encontra a posição do parêntese aberto
+        const index = phone.indexOf('(');
+    
+        // Adiciona o caractere '+' após o parêntese aberto
+        phone = phone.substring(0, index + 1) + '+' + phone.substring(index + 1);
+      }
+
+      const converx = {
+        "name": personName,
+        "phone": phone,
+        "account": 196,
+        "template": TEMPLATE,
+        "inbox_id": 605,
+        "parameter_1": personName,
+        "parameter_2": dealTitle,
+        "parameter_3": stageTitle,
+        "flow": "Notificação de atualização no estado do serviço"
+      }
+  
+      axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
+      .then((response) => {
+        console.log('Response:', response.data);
+      })
+      .catch((error) => {
+        console.error('Error:', error.response.data);
+      });
 
 
       if (email && stageName) {
@@ -58,12 +96,12 @@ app.post('/webhook', async (req, res) => {
         const mailOptions = {
           from: '"Apex Propriedade Intelectual" <teste@apexipartners.com>',
           to: email,
-          subject: 'Atualização de Status do Serviço',
-          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageName}".\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
+          subject: 'Notificação de Serviço Apex',
+          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" foi ganho!".\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
           html: `
             <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
               <p>Olá, <strong>${contactName}</strong></p>
-              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageName}".</strong></p>
+              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" foi ganho!.</strong></p>
               <p style="font-size: 16px;">Atenciosamente,<br>Equipe da Apex Propriedade Intelectual</p>
             </div>
           `,

@@ -5,7 +5,7 @@
     "Entity": "Deals",
     "New": {
     "Amount": 0,
-    "ContactId": 501088506,
+    "ContactId": 501099261,
     "ContactName": "Empresa Teste",
     "CreateDate": "2024-02-19T18:49:10.143",
     "CreatorId": 50004631,
@@ -39,7 +39,7 @@
     },
     "Old": {
     "Amount": 0,
-    "ContactId": 501088506,
+    "ContactId": 501099261,
     "ContactName": "Empresa Teste",
     "CreateDate": "2024-02-19T18:49:10.143",
     "CreatorId": 50004631,
