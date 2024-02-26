@@ -28,11 +28,26 @@ app.post('/webhook', async (req, res) => {
     const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
-    const TEMPLATE = "atualizacao_servico"
+    const TEMPLATE = "resposta_servico"
     const FLOW = "Notificação de atualização no estado do serviço"
 
-    if (pipelineId !== 50000676) {
-      console.log('Pipeline diferente')
+    const action = req.body.Action;
+
+    let resposta;
+
+    switch (action) {
+      case 'Win':
+        resposta = 'ganho';
+        break;
+      case 'Lose':
+        resposta = 'perdido';
+        break;
+      default:
+        resposta = 'Ação desconhecida';
+    }
+
+    // PIPELINE DE TESTE: 50000676
+    if (pipelineId !== 10015005) {
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
     
@@ -75,9 +90,11 @@ app.post('/webhook', async (req, res) => {
         "inbox_id": 605,
         "parameter_1": personName,
         "parameter_2": dealTitle,
-        "parameter_3": stageTitle,
+        "parameter_3": resposta,
         "flow": FLOW
       }
+
+      console.log(resposta)
   
       await axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
       .then((response) => {
@@ -94,11 +111,11 @@ app.post('/webhook', async (req, res) => {
           from: '"Apex Propriedade Intelectual" <teste@apexipartners.com>',
           to: email,
           subject: 'Atualização de Status do Serviço',
-          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageTitle}".\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
+          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de ${resposta}.\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
           html: `
             <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
               <p>Olá, <strong>${contactName}</strong></p>
-              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de "${stageTitle}".</strong></p>
+              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" foi ${resposta}.</strong></p>
               <p style="font-size: 16px;">Atenciosamente,<br>Equipe da Apex Propriedade Intelectual</p>
             </div>
           `,
