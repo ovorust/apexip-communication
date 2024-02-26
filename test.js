@@ -55,7 +55,7 @@ ref.on('child_added', (snapshot) => {
       const index = phone.indexOf('(');
   
       // Adiciona o caractere '+' após o parêntese aberto
-      phone = phone.substring(0, index + 1) + '+' + phone.substring(index + 1);
+      phone = '+55 ' + phone
   }
 
 
@@ -107,13 +107,13 @@ ref.on('child_added', (snapshot) => {
     });
 
     
-    axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
-    .then((response) => {
-      console.log('Response:', response.data);
-    })
-    .catch((error) => {
-      console.error('Error:', error.response.data);
-    });
+    // axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
+    // .then((response) => {
+    //   console.log('Response:', response.data);
+    // })
+    // .catch((error) => {
+    //   console.error('Error:', error.response.data);
+    // });
 
     // Aqui você pode incluir outras ações que deseja realizar após o envio do email, se necessário
 

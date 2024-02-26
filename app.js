@@ -60,15 +60,8 @@ app.post('/webhook', async (req, res) => {
       const email = contactInfo.data.value[0].Email;
       const stageName = stageInfo.data.value[0].Name;
 
-      let phone = contactInfo.data.value[0]?.Phones[0]?.PhoneNumber;
+      const phone = '+55 ' + contactInfo.data.value[0]?.Phones[0]?.PhoneNumber;
 
-      if (phone.startsWith('(')) {
-        // Encontra a posição do parêntese aberto
-        const index = phone.indexOf('(');
-    
-        // Adiciona o caractere '+' após o parêntese aberto
-        phone = phone.substring(0, index + 1) + '+' + phone.substring(index + 1);
-      }
 
       const converx = {
         "name": personName,
