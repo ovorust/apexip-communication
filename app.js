@@ -28,7 +28,7 @@ app.post('/webhook', async (req, res) => {
     const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
-    const TEMPLATE = "servico_ganho"
+    const TEMPLATE = "atualizacao_servico"
     const FLOW = "Notificação de atualização no estado do serviço"
 
     if (pipelineId !== 50000676) {
