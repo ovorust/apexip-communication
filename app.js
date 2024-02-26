@@ -28,6 +28,8 @@ app.post('/webhook', async (req, res) => {
     const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
+    const TEMPLATE = "servico_ganho"
+    const FLOW = "Notificação de atualização no estado do serviço"
 
     if (pipelineId !== 50000676) {
       console.log('Pipeline diferente')
@@ -74,7 +76,7 @@ app.post('/webhook', async (req, res) => {
         "parameter_1": personName,
         "parameter_2": dealTitle,
         "parameter_3": stageTitle,
-        "flow": "Notificação de atualização no estado do serviço"
+        "flow": FLOW
       }
   
       await axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
