@@ -47,7 +47,7 @@ app.post('/webhook', async (req, res) => {
     }
 
     // PIPELINE DE TESTE: 50000676
-    if (pipelineId !== 10015005) {
+    if (pipelineId !== 50000676) {
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
     
