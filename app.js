@@ -62,7 +62,7 @@ app.post('/webhook', async (req, res) => {
 
       
       const email = contactInfo.data.value[0].Email;
-      const stageName = stageInfo.data.value[0].Name;
+      const stageTitle = stageInfo.data.value[0].Name;
 
       const phone = '+55 ' + contactInfo.data.value[0]?.Phones[0]?.PhoneNumber;
 
