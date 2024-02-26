@@ -88,7 +88,7 @@ app.post('/webhook', async (req, res) => {
       });
 
 
-      if (email && stageName) {
+      if (email && stageTitle) {
         // Configuração da mensagem de e-mail
         const mailOptions = {
           from: '"Apex Propriedade Intelectual" <teste@apexipartners.com>',
