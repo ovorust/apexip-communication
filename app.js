@@ -31,20 +31,6 @@ app.post('/webhook', async (req, res) => {
     const TEMPLATE = "informacao_servico"
     const FLOW = "Notificação de atualização no estado do serviço"
 
-    const action = req.body.Action;
-
-    let resposta;
-
-    switch (action) {
-      case 'Win':
-        resposta = 'ganho';
-        break;
-      case 'Lose':
-        resposta = 'perdido';
-        break;
-      default:
-        resposta = 'Ação desconhecida';
-    }
     // PIPELINE COMERCIAL: 10015005
     // PIPELINE DE TESTE: 50000676
     if (pipelineId !== 50000676 || stageId !== 50003845) {
@@ -93,11 +79,9 @@ app.post('/webhook', async (req, res) => {
         "inbox_id": 605,
         "parameter_1": personName,
         "parameter_2": dealTitle,
-        "parameter_3": resposta,
+        "parameter_3": RESPOSTA,
         "flow": FLOW
       }
-
-      console.log(resposta)
   
       await axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
       .then((response) => {
