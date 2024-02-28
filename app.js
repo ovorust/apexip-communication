@@ -28,7 +28,7 @@ app.post('/webhook', async (req, res) => {
     const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
-    const TEMPLATE = "notificar_cliente"
+    const TEMPLATE = "informacao_servico"
     const FLOW = "Notificação de atualização no estado do serviço"
 
     const action = req.body.Action;
@@ -82,6 +82,8 @@ app.post('/webhook', async (req, res) => {
 
       const phone = '+55 ' + contactInfo.data.value[0]?.Phones[0]?.PhoneNumber;
 
+      const RESPOSTA = 'realizado'
+
 
       const converx = {
         "name": personName,
@@ -112,12 +114,14 @@ app.post('/webhook', async (req, res) => {
           from: '"Apex Propriedade Intelectual" <teste@apexipartners.com>',
           to: email,
           subject: 'Atualização de Status do Serviço',
-          text: `Olá,\n\nGostaríamos de informar que o seu serviço "${dealTitle}" alcançou o estado de ${resposta}.\n\nAtenciosamente,\nEquipe da Apex Propriedade Intelectual`,
+          text: `Olá,\n\nGostaríamos de informar que o serviço "${dealTitle}" contratado, já está sendo ${RESPOSTA} internamente.\n\nEm breve, você receberá atualizações detalhadas sobre o status do serviço. Agradecemos a sua confiança e estamos à disposição para quaisquer esclarecimentos adicionais.\n\nAtenciosamente,\n
+          Apex Marcas e Patentes`,
           html: `
             <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
               <p>Olá, <strong>${contactName}</strong></p>
-              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o seu serviço "${dealTitle}" foi ${resposta}.</strong></p>
-              <p style="font-size: 16px;">Atenciosamente,<br>Equipe da Apex Propriedade Intelectual</p>
+              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o serviço "${dealTitle}" contratado, já está sendo ${RESPOSTA} internamente.</strong></p>
+              <p style="font-size: 18px;">Em breve, você receberá atualizações detalhadas sobre o status do serviço. Agradecemos a sua confiança e estamos à disposição para quaisquer esclarecimentos adicionais.</p>
+              <p style="font-size: 16px;">Atenciosamente,<br>Apex Marcas e Patentes</p>
             </div>
           `,
         };
