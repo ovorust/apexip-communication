@@ -28,13 +28,12 @@ app.post('/webhook', async (req, res) => {
     const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
-    const TEMPLATE = "informacao_servico"
+    const TEMPLATE = "servico_notificacao"
     const FLOW = "Notificação de atualização no estado do serviço"
 
-    // PIPELINE COMERCIAL: 10015005
-    // PIPELINE DE TESTE: 50000676
+    // PIPELINE COMERCIAL: 10015005   FECHAMENTO DE NEGÓCIO (ÚLTIMO ESTÁGIO): 10075648
+    // PIPELINE DE TESTE: 50000676    ETAPA 3 (ÚLTIMO ESTÁGIO): 50000676
     if (pipelineId !== 50000676 || stageId !== 50003845) {
-      console.log('Pipeline ou Stage não correspondente')
       return res.status(200).send('Pipeline ID ou Stage não corresponde. Nenhuma ação necessária.');
     }
     
@@ -68,9 +67,6 @@ app.post('/webhook', async (req, res) => {
 
       const phone = '+55 ' + contactInfo.data.value[0]?.Phones[0]?.PhoneNumber;
 
-      const RESPOSTA = 'realizado'
-
-
       const converx = {
         "name": personName,
         "phone": phone,
@@ -79,7 +75,6 @@ app.post('/webhook', async (req, res) => {
         "inbox_id": 605,
         "parameter_1": personName,
         "parameter_2": dealTitle,
-        "parameter_3": RESPOSTA,
         "flow": FLOW
       }
   
@@ -93,22 +88,23 @@ app.post('/webhook', async (req, res) => {
 
 
       if (email && stageTitle) {
-        // Configuração da mensagem de e-mail
+        // Configuração da mensagem de e-mail (REMOVIDO <teste@apexipartners.com>)
         const mailOptions = {
-          from: '"Apex Propriedade Intelectual" <teste@apexipartners.com>',
+          from: '"Apex Propriedade Intelectual"',
           to: email,
           subject: 'Atualização de Status do Serviço',
-          text: `Olá,\n\nGostaríamos de informar que o serviço "${dealTitle}" contratado, já está sendo ${RESPOSTA} internamente.\n\nEm breve, você receberá atualizações detalhadas sobre o status do serviço. Agradecemos a sua confiança e estamos à disposição para quaisquer esclarecimentos adicionais.\n\nAtenciosamente,\n
-          Apex Marcas e Patentes`,
+          text: `Olá,\n\nGostaríamos de informar que o serviço "${dealTitle}" já está em andamento.\n\nEm breve, você receberá atualizações o status do caso.\n\nCaso tenha alguma dúvida, sinta-se à vontade para entrar em contato.\n\nAgradecemos a sua confiança!\nEquipe Apex Marcas e Patentes`,
           html: `
             <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
               <p>Olá, <strong>${contactName}</strong></p>
-              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o serviço "${dealTitle}" contratado, já está sendo ${RESPOSTA} internamente.</strong></p>
-              <p style="font-size: 18px;">Em breve, você receberá atualizações detalhadas sobre o status do serviço. Agradecemos a sua confiança e estamos à disposição para quaisquer esclarecimentos adicionais.</p>
-              <p style="font-size: 16px;">Atenciosamente,<br>Apex Marcas e Patentes</p>
+              <p style="font-size: 18px;"><strong>Gostaríamos de informar que o serviço "${dealTitle}" já está em andamento.</strong></p>
+              <p style="font-size: 18px;">Em breve, você receberá atualizações o status do caso.</p>
+              <p style="font-size: 18px;">Caso tenha alguma dúvida, sinta-se à vontade para entrar em contato.</p>
+              <p style="font-size: 16px;">Agradecemos a sua confiança!<br>Equipe Apex Marcas e Patentes</p>
             </div>
           `,
         };
+        
 
         // Enviar e-mail
         transporter.sendMail(mailOptions, (error, info) => {
