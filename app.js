@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
     host: "smtp.hostinger.com",
     port: 465,
     auth: {
-        user: "teste@apexipartners.com", // Seu usuário SMTP
+        user: "no-reply@apexipartners.com", // Seu usuário SMTP
         pass: "Apex@123", // Sua senha SMTP
     },
 });
@@ -90,7 +90,7 @@ app.post('/webhook', async (req, res) => {
       if (email && stageTitle) {
         // Configuração da mensagem de e-mail (REMOVIDO <teste@apexipartners.com>)
         const mailOptions = {
-          from: '"Apex Propriedade Intelectual"',
+          from: '"Apex Propriedade Intelectual" <no-reply@apexipartners.com>',
           to: email,
           subject: 'Atualização de Status do Serviço',
           text: `Olá,\n\nGostaríamos de informar que o serviço "${dealTitle}" já está em andamento.\n\nEm breve, você receberá atualizações o status do caso.\n\nCaso tenha alguma dúvida, sinta-se à vontade para entrar em contato.\n\nAgradecemos a sua confiança!\nEquipe Apex Marcas e Patentes`,
