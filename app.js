@@ -128,6 +128,119 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
+app.post('/calls', async (req, res) => {
+  try {
+
+    function secondsToMinutes(durationInSeconds) {
+      // Divida a duração em segundos pelo número de segundos em um minuto (60)
+      const minutes = Math.floor(durationInSeconds / 60);
+      // O resto da divisão são os segundos restantes
+      const seconds = durationInSeconds % 60;
+      // Retorne a duração formatada como "minutos:segundos"
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
+  
+  function getCurrentDateTime() {
+    const now = new Date();
+  
+    // Definir o fuso horário para Brasília
+    const options = { timeZone: 'America/Sao_Paulo' };
+  
+    // Formatar a data e hora atual no fuso horário de Brasília
+    const brazilDateTime = now.toLocaleString('en-US', options);
+  
+    // Converter a data e hora para uma string ISO 8601
+    const isoDateTime = new Date(brazilDateTime).toISOString();
+  
+    // Retornar a data e hora formatada no formato ISO 8601
+    return isoDateTime;
+  }
+  
+  function formatDateTime(inputDateTime) {
+    // Divide a string da data e hora em partes
+    const parts = inputDateTime.split(' ');
+    const datePart = parts[0];
+    const timePart = parts[1];
+  
+    // Divide a parte da data em partes
+    const dateParts = datePart.split('-');
+    const year = dateParts[0];
+    const month = dateParts[1];
+    const day = dateParts[2];
+  
+    // Retorna a data no formato desejado
+    return `${day}/${month}/${year} - ${timePart.substring(0, 5)}`;
+  }
+  
+      const phoneNumber = req.body.logentry.origin_formatted;
+      const audioRecord = req.body.logentry.audio_record;
+      const consumerCalled = req.body.logentry.first_call_consumer;
+      const duration = req.body.logentry.duration;
+      const callDateTz = req.body.logentry.date_answer_tz.date;
+      const callDate = formatDateTime(callDateTz)
+      const callDuration = secondsToMinutes(duration)
+      let callType;
+      if (consumerCalled === 0) {
+        callType = 'Ligação Realizada'    
+      } else {
+        callType = 'Ligação Recebida'
+      }
+  
+      axios.get(`https://api2.ploomes.com/Contacts?$expand=Phones&$filter=Phones/any(phone: phone/PhoneNumber eq '${phoneNumber}')&$orderby=TypeId desc`, {
+          headers: {
+              'User-Key': process.env.PLOOMES_USER_KEY
+          }
+      })
+      .then(response => {
+        
+  
+        if (response.data.value.length === 0) {
+          console.log('Contato não presente na lista.');
+          return; // Não prossiga se não houver nenhum contato encontrado
+        }
+
+        const contact = response.data.value[0];
+          
+        const dateNow = getCurrentDateTime();
+  
+        const interactionRecord = {
+          "ContactId": contact.Id,
+          "DealId": null,
+          "Date": dateNow,
+          "Content": `${callType}: ${audioRecord}\nDuração: ${callDuration}\nData: ${callDate}`,
+          "TypeId": contact.TypeId,
+          "OtherProperties": [
+              {
+                  "FieldKey": "interaction_record_250E00F0-0DF7-4026-96F8-9029A7D76D8F",
+                  "IntegerValue": 13
+              }
+          ]
+        }
+  
+        axios.post('https://api2.ploomes.com/InteractionRecords', interactionRecord, {
+        headers: {
+            'User-Key': process.env.PLOOMES_USER_KEY
+            }
+        })
+        .then(response => {
+            console.log('Registro de interação registrado com sucesso:', response.data);
+        })
+        .catch(error => {
+            console.error('Erro ao criar registro de interação:', error.response.data);
+        });
+    
+      })
+      .catch(error => {
+          console.error('Erro ao buscar o contato:', error);
+      });
+
+
+  } catch (error) {
+    console.error('Erro ao processar a requisição:', error.message);
+    return res.status(500).send('Erro ao processar a requisição');
+  }
+});
+
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
