@@ -224,14 +224,17 @@ app.post('/calls', async (req, res) => {
         })
         .then(response => {
             console.log('Registro de interação registrado com sucesso:', response.data);
+            return res.status(200).send('Registro de interação registrado com sucesso.');
         })
         .catch(error => {
             console.error('Erro ao criar registro de interação:', error.response.data);
+            return res.status(500).send('Erro ao criar registro de interação');
         });
     
       })
       .catch(error => {
           console.error('Erro ao buscar o contato:', error);
+          return res.status(500).send('Erro ao buscar o contato');
       });
 
 
