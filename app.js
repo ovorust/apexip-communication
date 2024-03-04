@@ -28,7 +28,7 @@ app.post('/webhook', async (req, res) => {
     const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
-    const TEMPLATE = "servico_notificacao"
+    const TEMPLATE = "notificacao_servicos"
     const FLOW = "Notificação de atualização no estado do serviço"
 
     // PIPELINE COMERCIAL: 10015005   FECHAMENTO DE NEGÓCIO (ÚLTIMO ESTÁGIO): 10075648
