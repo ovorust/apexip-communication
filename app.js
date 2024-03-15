@@ -300,6 +300,55 @@ app.post('/ploomeswin', async (req, res) => {
   }
 });
 
+app.post('/ploomesnew', async (req, res) => {
+  try {
+    const { ContactName, FinishDate, PipelineId, Title } = req.body.New;
+
+    // PIPELINE COMERCIAL (NACIONAL)
+    if (PipelineId !== 10015005) {
+      return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
+    }
+
+    res.status(200).send('Processando a requisição...'); // Resposta imediata ao webhook
+
+
+    const taskId = tasks[0].id;
+    const cardCreateDateInMilliseconds = new Date(FinishDate).getTime();
+
+    const requestBody = {
+      "name": Title,
+      "assignees": [],
+      "tags": [
+      "ploomes"
+      ],
+      "status": "To do",
+      "due_date_time": false,
+      "start_date": cardCreateDateInMilliseconds,
+      "start_date_time": false,
+      "notify_all": false,
+      "parent": null,
+      "links_to": null,
+      "check_required_custom_fields": true,
+      "custom_fields": [
+      {
+      "id": "e1f8157c-af5d-455a-b6c8-07771c482779",
+      "value": ContactName
+      }
+      ]
+      };
+
+    await axios.post(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
+      headers: {
+        'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
+      }
+    });
+
+    console.log('[/ploomesnew] Card criado!');
+  } catch (error) {
+    console.error('Erro ao processar requisição /ploomesnew:', error.message);
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
