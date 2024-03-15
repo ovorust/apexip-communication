@@ -298,25 +298,28 @@ app.post('/ploomeswin', async (req, res) => {
         }
         })
         .then(response => {
-
             console.log('[/ploomeswin] Card concluído!')
+            return res.status(200).send('Card concluído!')
         })
         .catch(error => {
           console.error('Erro ao editar tarefa:', error);
+          return res.status(500).send('Erro ao editar tarefa!')
         });
       } else {
         console.error('Resposta da API não está no formato esperado');
+        return res.status(500).send('Resposta da API não está no formato esperado!')
       }
 
     })
     .catch(error => {
       console.error('Erro ao obter tarefas:', error);
+      return res.status(500).send('Erro ao obter tarefas!')
     });
 
 
   } catch (error) {
-    console.error('Erro ao processar requisição ploomeswin:', error.message)
-    return res.status(500).send('Erro ao processar requisição ploomeswin')
+    console.error('Erro ao processar requisição /ploomeswin:', error.message)
+    return res.status(500).send('Erro ao processar requisição /ploomeswin')
   }
 })
 
