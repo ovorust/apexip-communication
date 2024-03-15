@@ -264,7 +264,7 @@ app.post('/ploomeswin', async (req, res) => {
 
       const customFields = [{
         field_id: "e1f8157c-af5d-455a-b6c8-07771c482779",
-        value: contactName,
+        value: String(contactName),
         operator: "="
       }];
 
