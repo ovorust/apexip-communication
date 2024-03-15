@@ -252,76 +252,54 @@ app.post('/calls', async (req, res) => {
 
 app.post('/ploomeswin', async (req, res) => {
   try {
-      const contactName = req.body.New.ContactName;
-      const cardEndDate = req.body.New.FinishDate
-      const pipelineId = req.body.New.PipelineId
+    const { ContactName, FinishDate, PipelineId, Title } = req.body.New;
 
-      if (pipelineId === 50000676) {
-        console.log('Card ganho no Pipeline de Testes');
-      } else {
-        return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
-      }
+    if (PipelineId !== 50000676) {
+      return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
+    }
 
+    console.log('Card ganho no Pipeline de Testes');
+    res.status(200).send('Processando a requisição...'); // Resposta imediata ao webhook
 
-      axios.get(`https://api.clickup.com/api/v2/list/901103087671/task`, {
+    const response = await axios.get(`https://api.clickup.com/api/v2/list/901103087671/task`, {
       headers: {
         'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
       },
       params: {
-        custom_fields: `[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": "${contactName}", "operator": "="}]`
+        custom_fields: `[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": "${ContactName}", "operator": "="}]`
       }
-    })
-    .then(response => {
-      // Verificando se a resposta tem a estrutura esperada
-      
-        const dateString = cardEndDate;
-        const cardEndDateInMilliseconds = new Date(dateString).getTime();
+    });
 
+    if (response.data && response.data.tasks && Array.isArray(response.data.tasks)) {
+      const tasks = response.data.tasks;
+      if (tasks.length === 0) {
+        console.error('Nenhuma tarefa encontrada');
+        return;
+      }
 
+      const taskId = tasks[0].id;
+      const cardEndDateInMilliseconds = new Date(FinishDate).getTime();
 
-      if (response.data && response.data.tasks && Array.isArray(response.data.tasks)) {
-        // Se a estrutura está correta, vamos acessar os dados da tarefa
-        const tasks = response.data.tasks;
-        const taskId = tasks[0].id
-        // Vamos assumir que você está interessado apenas na primeira tarefa
-        // console.log(tasks);
+      const requestBody = {
+        "name": Title,
+        "due_date": cardEndDateInMilliseconds,
+      };
 
-        const requestBody = {
-          "name": "card concluído",
-          "due_date": cardEndDateInMilliseconds,
-        }
-
-        axios.put(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
-
+      await axios.put(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
         headers: {
           'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
         }
-        })
-        .then(response => {
-            console.log('[/ploomeswin] Card concluído!')
-            return res.status(200).send('Card concluído!')
-        })
-        .catch(error => {
-          console.error('Erro ao editar tarefa:', error);
-          return res.status(500).send('Erro ao editar tarefa!')
-        });
-      } else {
-        console.error('Resposta da API não está no formato esperado');
-        return res.status(500).send('Resposta da API não está no formato esperado!')
-      }
+      });
 
-    })
-    .catch(error => {
-      console.error('Erro ao obter tarefas:', error);
-      return res.status(500).send('Erro ao obter tarefas!')
-    });
-
-
+      console.log('[/ploomeswin] Card concluído!');
+    } else {
+      console.error('Resposta da API não está no formato esperado');
+    }
   } catch (error) {
-    console.error('Erro ao processar requisição /ploomeswin:', error.message)
-    return res.status(500).send('Erro ao processar requisição /ploomeswin')
+    console.error('Erro ao processar requisição /ploomeswin:', error.message);
   }
-})
+});
+
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
