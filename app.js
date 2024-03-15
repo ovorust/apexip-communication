@@ -254,11 +254,11 @@ app.post('/ploomeswin', async (req, res) => {
   try {
     const { ContactName, FinishDate, PipelineId, Title } = req.body.New;
 
-    if (PipelineId !== 50000676) {
+    // PIPELINE COMERCIAL (NACIONAL)
+    if (PipelineId !== 10015005) {
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
 
-    console.log('Card ganho no Pipeline de Testes');
     res.status(200).send('Processando a requisição...'); // Resposta imediata ao webhook
 
     const response = await axios.get(`https://api.clickup.com/api/v2/list/901103087671/task`, {
@@ -307,7 +307,7 @@ app.post('/ploomesnew', async (req, res) => {
     const { ContactName, PipelineId, Title } = req.body.New;
 
     // PIPELINE COMERCIAL (NACIONAL)
-    if (PipelineId !== 50000676) {
+    if (PipelineId !== 10015005) {
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
 
