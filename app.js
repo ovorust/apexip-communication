@@ -305,7 +305,7 @@ app.post('/ploomesnew', async (req, res) => {
     const { ContactName, FinishDate, PipelineId, Title } = req.body.New;
 
     // PIPELINE COMERCIAL (NACIONAL)
-    if (PipelineId !== 10015005) {
+    if (PipelineId !== 50000676) {
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
 
