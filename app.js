@@ -283,6 +283,8 @@ app.post('/ploomeswin', async (req, res) => {
       const requestBody = {
         "name": Title,
         "due_date": cardEndDateInMilliseconds,
+        "notify_all": false,
+        "status": "Complete"
       };
 
       await axios.put(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
@@ -302,7 +304,7 @@ app.post('/ploomeswin', async (req, res) => {
 
 app.post('/ploomesnew', async (req, res) => {
   try {
-    const { ContactName, FinishDate, PipelineId, Title } = req.body.New;
+    const { ContactName, PipelineId, Title } = req.body.New;
 
     // PIPELINE COMERCIAL (NACIONAL)
     if (PipelineId !== 50000676) {
@@ -316,12 +318,9 @@ app.post('/ploomesnew', async (req, res) => {
     const requestBody = {
       "name": Title,
       "assignees": [],
-      "tags": [
-      "ploomes"
-      ],
+      "tags": ["ploomes"],
       "status": "To do",
       "due_date_time": false,
-      "start_date": cardCreateDateInMilliseconds,
       "start_date_time": false,
       "notify_all": false,
       "parent": null,
