@@ -311,8 +311,6 @@ app.post('/ploomesnew', async (req, res) => {
 
     res.status(200).send('Processando a requisição...'); // Resposta imediata ao webhook
 
-
-    const taskId = tasks[0].id;
     const cardCreateDateInMilliseconds = new Date(FinishDate).getTime();
 
     const requestBody = {
@@ -337,7 +335,7 @@ app.post('/ploomesnew', async (req, res) => {
       ]
       };
 
-    await axios.post(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
+    await axios.post(`https://api.clickup.com/api/v2/list/901103087671/task`, requestBody, {
       headers: {
         'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
       }
