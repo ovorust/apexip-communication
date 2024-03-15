@@ -1,124 +1,135 @@
-require('dotenv').config();
-const admin = require('firebase-admin');
-const nodemailer = require('nodemailer');
-const axios = require('axios');
+const axios = require('axios')
 
-const serviceAccount = require('./ploomes-webhook-firebase-adminsdk-qa6or-63a88d0737.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://ploomes-webhook-default-rtdb.firebaseio.com/'
-});
-
-const db = admin.database();
-const ref = db.ref('/clientes');
-
-const TEMPLATE = 'atualizacao_servico';
-const FLOW = 'Notificação de Atualização de Serviço'
-
-ref.on('child_added', (snapshot) => {
-  const clientId = snapshot.key;
-  const newClientData = snapshot.val();
-
-  const contactId = newClientData?.New?.ContactId;
-  const contactName = newClientData?.New?.ContactName;
-  const dealTitle = newClientData?.New?.Title;
-  const dealStatusId = newClientData?.New?.StageId;
-  const pipelineId = newClientData?.New?.PipelineId;
-  const personName = newClientData?.New?.PersonName;
-
-  if (!contactId) {
-    console.log('No contact ID found for new client.');
-    return;
+axios.get(`https://api.clickup.com/api/v2/list/901103087671/task`, {
+  headers: {
+    'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
+  },
+  params: {
+    custom_fields: '[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": "501090282", "operator": "="}]'
   }
+})
+.then(response => {
+  // Verificando se a resposta tem a estrutura esperada
 
-  if (pipelineId != '50000676') {
-    console.log(`Pipeline ID ${pipelineId} is not the required pipeline for sending email. Removing client ${clientId} from database.`);
-    ref.child(clientId).remove()
-      .then(() => console.log(`Cliente ${clientId} removido com sucesso.`))
-      .catch((error) => console.error('Erro ao remover cliente:', error));
-    return;
-  }
+  const respostaWebhookCardGanho = {
+    "AccountId": 1003788,
+    "Action": "Win",
+    "ActionUserId": 10025735,
+    "Entity": "Deals",
+    "New": {
+    "Amount": 0,
+    "CollaboratingUsers": [
+    {
+    "UserId": 10025735
+    }
+    ],
+    "ContactId": 501104187,
+    "ContactName": "Anselmo",
+    "CreateDate": "2024-02-28T12:18:04.737",
+    "CreatorId": 50003950,
+    "CurrencyId": 1,
+    "DaysInStage": 0,
+    "FinishDate": "2024-02-28T19:00:01.233",
+    "HasScheduledTasks": false,
+    "HoursInStage": 0,
+    "Id": 501090282,
+    "IsLastQuoteApproved": true,
+    "LastInteractionRecordId": 503824368,
+    "LastStageId": 10087507,
+    "LastUpdateDate": "2024-02-28T19:00:01.213",
+    "Length": 0,
+    "OriginId": 50003697,
+    "OtherProperties": {
+    "deal_2A81336C-5576-4FAC-ACAF-87977148F98A": 744747
+    },
+    "OwnerId": 10025735,
+    "PipelineId": 10017213,
+    "Read": true,
+    "StageId": 10087507,
+    "StartAmount": 0,
+    "StartCurrencyId": 1,
+    "StartDate": "2024-02-28T12:18:04.737",
+    "StatusId": 2,
+    "TasksOrdination": 2,
+    "Title": "Novo Lead Convertido (Qualificar)",
+    "UpdaterId": 10025735
+    },
+    "Old": {
+    "Amount": 0,
+    "CollaboratingUsers": [
+    {
+    "UserId": 10025735
+    }
+    ],
+    "ContactId": 501104187,
+    "ContactName": "Anselmo",
+    "CreateDate": "2024-02-28T12:18:04.737",
+    "CreatorId": 50003950,
+    "CurrencyId": 1,
+    "DaysInStage": 0,
+    "HasScheduledTasks": false,
+    "HoursInStage": 7,
+    "Id": 501090282,
+    "IsLastQuoteApproved": true,
+    "LastInteractionRecordId": 503824368,
+    "LastUpdateDate": "2024-02-28T13:19:32.41",
+    "Length": 0,
+    "OriginId": 50003697,
+    "OtherProperties": {
+    "deal_2A81336C-5576-4FAC-ACAF-87977148F98A": 744747
+    },
+    "OwnerId": 10025735,
+    "PipelineId": 10017213,
+    "Read": true,
+    "StageId": 10087507,
+    "StartAmount": 0,
+    "StartCurrencyId": 1,
+    "StartDate": "2024-02-28T12:18:04.737",
+    "StatusId": 1,
+    "TasksOrdination": 2,
+    "Title": "Novo Lead Convertido (Qualificar)",
+    "UpdaterId": 10025735
+    },
+    "WebhookCreatorId": 50004632,
+    "WebhookId": 50001877
+    }
 
-  axios.get(`https://api2.ploomes.com/Contacts?$filter=Id eq ${contactId}&$expand=Phones&$orderby=TypeId desc`, {
+    const dateString = respostaWebhookCardGanho.New.FinishDate;
+    const milliseconds = new Date(dateString).getTime();
+    console.log(milliseconds);
+
+
+  if (response.data && response.data.tasks && Array.isArray(response.data.tasks)) {
+    // Se a estrutura está correta, vamos acessar os dados da tarefa
+    const tasks = response.data.tasks;
+    const taskId = tasks[0].id
+    // Vamos assumir que você está interessado apenas na primeira tarefa
+    // console.log(tasks);
+
+    const requestBody = {
+      "name": "testando 5",
+      "due_date": milliseconds,
+      "tags": ['ploomes']
+    }
+
+    axios.put(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
+
     headers: {
-      'User-Key': process.env.PLOOMES_USER_KEY,
-      'Content-Type': 'application/json'
+      'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
     }
-  })
-  .then(response => {
-    const email = response.data.value[0]?.Email;
-    let phone = response.data.value[0]?.Phones[0]?.PhoneNumber;
-
-    if (phone.startsWith('(')) {
-      // Encontra a posição do parêntese aberto
-      const index = phone.indexOf('(');
-  
-      // Adiciona o caractere '+' após o parêntese aberto
-      phone = '+55 ' + phone
-  }
-
-
-
-    if (!email) {
-      console.log('No email address found for the contact.');
-      return;
-    }
-
-    axios.get(`https://api2.ploomes.com/Deals@Stages?$filter=Id eq ${dealStatusId}`, {
-      headers: {
-        'User-Key': process.env.PLOOMES_USER_KEY,
-        'Content-Type': 'application/json'
-      }
     })
     .then(response => {
-      const stageTitle = response.data.value[0]?.Name;
 
-      if (!stageTitle) {
-        console.log('No deal title found for the given deal status ID.');
-        return;
-      }
-
-      // Aqui você pode realizar qualquer ação necessária com os dados obtidos da segunda requisição
-      const converx = {
-        "name": personName,
-        "phone": phone,
-        "account": 196,
-        "template": TEMPLATE,
-        "inbox_id": 605,
-        "parameter_1": personName,
-        "parameter_2": dealTitle,
-        "parameter_3": stageTitle,
-        "flow": "Notificação de atualização no estado do serviço"
-      }
-  
-      const config = {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      };
-  
-  
-      console.log(converx)
-
+        console.log('feito')
     })
     .catch(error => {
-      console.error('Erro ao obter o título do negócio:', error);
+      console.error('Erro ao editar tarefa:', error);
     });
+  } else {
+    console.error('Resposta da API não está no formato esperado');
+  }
 
-    
-    // axios.post('https://southamerica-east1-converx-hobspot.cloudfunctions.net/send_template', converx)
-    // .then((response) => {
-    //   console.log('Response:', response.data);
-    // })
-    // .catch((error) => {
-    //   console.error('Error:', error.response.data);
-    // });
-
-    // Aqui você pode incluir outras ações que deseja realizar após o envio do email, se necessário
-
-  })
-  .catch(error => {
-    console.error('Erro ao obter o endereço de e-mail do contato:', error);
-  });
+})
+.catch(error => {
+  console.error('Erro ao obter tarefas:', error);
 });

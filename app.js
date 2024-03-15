@@ -29,12 +29,18 @@ app.post('/webhook', async (req, res) => {
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
     const TEMPLATE = "notificacao_servicos"
-    const FLOW = "Notificação de atualização no estado do serviço"
+    let FLOW = ""
 
     // PIPELINE COMERCIAL: 10015005   FECHAMENTO DE NEGÓCIO (ÚLTIMO ESTÁGIO): 10075648
     // PIPELINE DE TESTE: 50000676    ETAPA 3 (ÚLTIMO ESTÁGIO): 50000676
-    if (pipelineId !== 10015005) {
-      return res.status(200).send('Pipeline ID ou Stage não corresponde. Nenhuma ação necessária.');
+    // PIPELINE DE SERVIÇOS NACIONAIS: 10015007
+    if (pipelineId === 10015005) {
+      FLOW = "Notificação de atualização no estado do serviço";
+    } else if (pipelineId === 10015007) {
+      FLOW = "Outro fluxo de notificação";
+    } else {
+      // Se for diferente desses dois pipelines, não fazer nada
+      return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
     
 
@@ -243,6 +249,75 @@ app.post('/calls', async (req, res) => {
     return res.status(500).send('Erro ao processar a requisição');
   }
 });
+
+app.post('/ploomeswin', async (req, res) => {
+  try {
+      const cardId = req.body.New.Id;
+      const cardEndDate = req.body.New.FinishDate
+      const pipelineId = req.body.new.PipelineId
+
+      if (pipelineId === 50000676) {
+        console.log('Card ganho no Pipeline de Testes');
+      } else {
+        return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
+      }
+
+      axios.get(`https://api.clickup.com/api/v2/list/901103087671/task`, {
+      headers: {
+        'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
+      },
+      params: {
+        custom_fields: `[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": ${cardId}, "operator": "="}]`
+      }
+    })
+    .then(response => {
+      // Verificando se a resposta tem a estrutura esperada
+      
+        const dateString = cardEndDate;
+        const cardEndDateInMilliseconds = new Date(dateString).getTime();
+
+
+
+      if (response.data && response.data.tasks && Array.isArray(response.data.tasks)) {
+        // Se a estrutura está correta, vamos acessar os dados da tarefa
+        const tasks = response.data.tasks;
+        const taskId = tasks[0].id
+        // Vamos assumir que você está interessado apenas na primeira tarefa
+        // console.log(tasks);
+
+        const requestBody = {
+          "name": "card concluído",
+          "due_date": cardEndDateInMilliseconds,
+        }
+
+        axios.put(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
+
+        headers: {
+          'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
+        }
+        })
+        .then(response => {
+
+            console.log(response, ' [/ploomeswin] Card concluído!')
+        })
+        .catch(error => {
+          console.error('Erro ao editar tarefa:', error);
+        });
+      } else {
+        console.error('Resposta da API não está no formato esperado');
+      }
+
+    })
+    .catch(error => {
+      console.error('Erro ao obter tarefas:', error);
+    });
+
+
+  } catch (error) {
+    console.error('Erro ao processar requisição ploomeswin:', error.message)
+    return res.status(500).send('Erro ao processar requisição ploomeswin')
+  }
+})
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
