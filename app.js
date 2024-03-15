@@ -262,18 +262,13 @@ app.post('/ploomeswin', async (req, res) => {
         return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
       }
 
-      const customFields = [{
-        field_id: "e1f8157c-af5d-455a-b6c8-07771c482779",
-        value: String(contactName),
-        operator: "="
-      }];
 
       axios.get(`https://api.clickup.com/api/v2/list/901103087671/task`, {
       headers: {
         'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
       },
       params: {
-        custom_fields: customFields
+        custom_fields: `[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": "${contactName}", "operator": "="}]`
       }
     })
     .then(response => {
