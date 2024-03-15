@@ -252,7 +252,7 @@ app.post('/calls', async (req, res) => {
 
 app.post('/ploomeswin', async (req, res) => {
   try {
-      const contactId = req.body.New.ContactId;
+      const contactName = req.body.New.ContactName;
       const cardEndDate = req.body.New.FinishDate
       const pipelineId = req.body.New.PipelineId
 
@@ -267,7 +267,7 @@ app.post('/ploomeswin', async (req, res) => {
         'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
       },
       params: {
-        custom_fields: `[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": ${contactId}, "operator": "="}]`
+        custom_fields: `[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": ${contactName}, "operator": "="}]`
       }
     })
     .then(response => {
@@ -298,7 +298,7 @@ app.post('/ploomeswin', async (req, res) => {
         })
         .then(response => {
 
-            console.log(response, ' [/ploomeswin] Card concluído!')
+            console.log('[/ploomeswin] Card concluído!')
         })
         .catch(error => {
           console.error('Erro ao editar tarefa:', error);
