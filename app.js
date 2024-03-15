@@ -254,7 +254,7 @@ app.post('/ploomeswin', async (req, res) => {
   try {
       const cardId = req.body.New.Id;
       const cardEndDate = req.body.New.FinishDate
-      const pipelineId = req.body.new.PipelineId
+      const pipelineId = req.body.New.PipelineId
 
       if (pipelineId === 50000676) {
         console.log('Card ganho no Pipeline de Testes');
