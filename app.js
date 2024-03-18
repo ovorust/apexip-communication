@@ -254,8 +254,8 @@ app.post('/ploomeswin', async (req, res) => {
   try {
     const { ContactName, FinishDate, PipelineId, Title } = req.body.New;
 
-    // PIPELINE COMERCIAL (NACIONAL) - TESTES
-    if (PipelineId !== 50000676) {
+    // PIPELINE COMERCIAL (NACIONAL)
+    if (PipelineId !== 10015005) {
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
 
@@ -307,7 +307,7 @@ app.post('/ploomesnew', async (req, res) => {
     const { ContactName, PipelineId, Title } = req.body.New;
 
     // PIPELINE COMERCIAL (NACIONAL)
-    if (PipelineId !== 50000676) {
+    if (PipelineId !== 10015005) {
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
     }
 
