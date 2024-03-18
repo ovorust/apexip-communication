@@ -316,11 +316,10 @@ app.post('/asaaspagamento', async (req, res) => {
 
     if (event !== "PAYMENT_RECEIVED") {
       console.log('Evento de pagamento não correspondente');
-      return res.status(200).send('Evento de pagamento não correspondente.');
+      return res.status(200).send('Evento de pagamento não correspondente.'); // Aqui é onde você envia a resposta
     }
 
-    console.log('Pagamento recebido ou criado');
-    res.status(200).send('Processando ações pós-pagamento...');
+    console.log('Pagamento recebido');
 
     const dealResponse = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
       headers: {
@@ -337,13 +336,14 @@ app.post('/asaaspagamento', async (req, res) => {
     });
 
     console.log('[/asaaspagamento] Card movido para o próximo estágio.');
-    return res.status(200).send('Card movido para o próximo estágio com sucesso.');
+    return res.status(200).send('Card movido para o próximo estágio com sucesso.'); // Aqui você pode enviar a resposta depois de todas as operações terem sido concluídas
 
   } catch (error) {
     console.error('Erro ao processar requisição /asaaspagamento:', error.message);
     return res.status(500).send('Erro ao processar requisição.');
   }
 });
+
 
 
 
