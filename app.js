@@ -313,8 +313,6 @@ app.post('/ploomesnew', async (req, res) => {
 
     res.status(200).send('Processando a requisição...'); // Resposta imediata ao webhook
 
-    const cardCreateDateInMilliseconds = new Date(FinishDate).getTime();
-
     const requestBody = {
       "name": Title,
       "assignees": [],
