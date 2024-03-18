@@ -263,7 +263,7 @@ app.post('/ploomeswin', async (req, res) => {
 
     const response = await axios.get(`https://api.clickup.com/api/v2/list/901103087671/task`, {
       headers: {
-        'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
+        'Authorization': process.env.API_CLICKUP,
       },
       params: {
         custom_fields: `[{"field_id":"e1f8157c-af5d-455a-b6c8-07771c482779", "value": "${ContactName}", "operator": "="}]`
@@ -289,7 +289,7 @@ app.post('/ploomeswin', async (req, res) => {
 
       await axios.put(`https://api.clickup.com/api/v2/task/${taskId}`, requestBody, {
         headers: {
-          'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
+          'Authorization': process.env.API_CLICKUP,
         }
       });
 
@@ -304,54 +304,47 @@ app.post('/ploomeswin', async (req, res) => {
 
 app.post('/asaaspagamento', async (req, res) => {
   try {
-    const event = req.body.event
-    const payment = req.body.payment
+    if (!req.body.event || !req.body.payment) {
+      console.log('Entrada inválida');
+      return res.status(400).send('Entrada inválida.');
+    }
 
-    const PIPELINE_TESTE = 50000676
-    const newStage = 50003845 // ETAPA 3
-
-    const patchBody = {
-      "StageId": newStage,
-    };
+    const event = req.body.event;
+    const payment = req.body.payment;
+    const PIPELINE_TESTE = 50000676;
+    const newStage = 50003845;
 
     if (event !== "PAYMENT_RECEIVED") {
-      console.log('Evento de pagamento não correspondente')
+      console.log('Evento de pagamento não correspondente');
       return res.status(200).send('Evento de pagamento não correspondente.');
     }
 
-    console.log('Pagamento recebido')
+    console.log('Pagamento recebido ou criado');
     res.status(200).send('Processando ações pós-pagamento...');
 
-    await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq ${payment.description}`, {
-          headers: {
-              'User-Key': process.env.PLOOMES_USER_KEY
-          }
-      })
-      .then(response => {
-        const dealId = response.data.Id
-        axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
-              headers: {
-                  'User-Key': process.env.PLOOMES_USER_KEY
-                  }
-        })
-        .then(response => {
-            console.log('[/asaaspagamento] Card movido para o próximo estágio.', response.data);
-            return res.status(200).send('Card movido para o próximo estágio com sucesso.');
-        })
-        .catch(error => {
-            console.error('[/asaaspagamento] Erro ao mover card para o próximo estágio.', error.response.data);
-            return res.status(500).send('Erro ao mover card para o próximo estágio.');
-        });
-      })
-      .catch(error => {
-        console.error('[/asaaspagamento] Erro no GET de Deals (Pipeline ou Title):', error.response.data);
-        return res.status(500).send('Erro ao criar registro de interação');
-      })
+    const dealResponse = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+      headers: {
+        'User-Key': process.env.PLOOMES_USER_KEY
+      }
+    });
+
+    const dealId = dealResponse.data.Id;
+
+    await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, { "StageId": newStage }, {
+      headers: {
+        'User-Key': process.env.PLOOMES_USER_KEY
+      }
+    });
+
+    console.log('[/asaaspagamento] Card movido para o próximo estágio.');
+    return res.status(200).send('Card movido para o próximo estágio com sucesso.');
 
   } catch (error) {
     console.error('Erro ao processar requisição /asaaspagamento:', error.message);
+    return res.status(500).send('Erro ao processar requisição.');
   }
 });
+
 
 
 app.listen(port, () => {
