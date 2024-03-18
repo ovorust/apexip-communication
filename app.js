@@ -302,45 +302,54 @@ app.post('/ploomeswin', async (req, res) => {
   }
 });
 
-app.post('/ploomesnew', async (req, res) => {
+app.post('/asaaspagamento', async (req, res) => {
   try {
-    const { ContactName, PipelineId, Title } = req.body.New;
+    const event = req.body.event
+    const payment = req.body.payment
 
-    // PIPELINE COMERCIAL (NACIONAL)
-    if (PipelineId !== 10015005) {
-      return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
+    const PIPELINE_TESTE = 50000676
+    const newStage = 50003845 // ETAPA 3
+
+    const patchBody = {
+      "StageId": newStage,
+    };
+
+    if (event !== "PAYMENT_RECEIVED") {
+      console.log('Evento de pagamento não correspondente')
+      return res.status(200).send('Evento de pagamento não correspondente.');
     }
 
-    res.status(200).send('Processando a requisição...'); // Resposta imediata ao webhook
+    console.log('Pagamento recebido')
+    res.status(200).send('Processando ações pós-pagamento...');
 
-    const requestBody = {
-      "name": Title,
-      "assignees": [],
-      "tags": ["ploomes"],
-      "status": "To do",
-      "due_date_time": false,
-      "start_date_time": false,
-      "notify_all": false,
-      "parent": null,
-      "links_to": null,
-      "check_required_custom_fields": true,
-      "custom_fields": [
-      {
-      "id": "e1f8157c-af5d-455a-b6c8-07771c482779",
-      "value": ContactName
-      }
-      ]
-      };
+    await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq ${payment.description}`, {
+          headers: {
+              'User-Key': process.env.PLOOMES_USER_KEY
+          }
+      })
+      .then(response => {
+        const dealId = response.data.Id
+        axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
+              headers: {
+                  'User-Key': process.env.PLOOMES_USER_KEY
+                  }
+        })
+        .then(response => {
+            console.log('[/asaaspagamento] Card movido para o próximo estágio.', response.data);
+            return res.status(200).send('Card movido para o próximo estágio com sucesso.');
+        })
+        .catch(error => {
+            console.error('[/asaaspagamento] Erro ao mover card para o próximo estágio.', error.response.data);
+            return res.status(500).send('Erro ao mover card para o próximo estágio.');
+        });
+      })
+      .catch(error => {
+        console.error('[/asaaspagamento] Erro no GET de Deals (Pipeline ou Title):', error.response.data);
+        return res.status(500).send('Erro ao criar registro de interação');
+      })
 
-    await axios.post(`https://api.clickup.com/api/v2/list/901103087671/task`, requestBody, {
-      headers: {
-        'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
-      }
-    });
-
-    console.log('[/ploomesnew] Card criado!');
   } catch (error) {
-    console.error('Erro ao processar requisição /ploomesnew:', error.message);
+    console.error('Erro ao processar requisição /asaaspagamento:', error.message);
   }
 });
 
