@@ -321,7 +321,7 @@ app.post('/asaaspagamento', async (req, res) => {
 
     console.log('Pagamento recebido')
 
-    await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq ${payment.description}`, {
+    await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
           headers: {
               'User-Key': process.env.PLOOMES_USER_KEY
           }
