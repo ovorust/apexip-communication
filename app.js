@@ -329,8 +329,8 @@ app.post('/asaaspagamento', async (req, res) => {
     });
 
     // Supondo que a resposta inclua um array de "Deals", e você esteja interessado no primeiro
-    if (response.data && response.data.length > 0) {
-      const dealId = response.data[0].Id; // Ajuste isso de acordo com a estrutura real da resposta
+    if (response.data.value && response.data.value.length > 0) {
+      const dealId = response.data.value[0].Id; // Ajuste isso de acordo com a estrutura real da resposta
 
       await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
         headers: {
@@ -339,12 +339,13 @@ app.post('/asaaspagamento', async (req, res) => {
       });
 
       console.log('[/asaaspagamento] Card movido para o próximo estágio.');
-      return res.status(200).send('Card movido para o próximo estágio com sucesso.');
+      
     } else {
       // Se nenhum negócio corresponder, retorne uma resposta diferente
       console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
-      return res.status(404).send('Nenhum negócio encontrado.');
+      return;
     }
+    return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
     console.error('Erro ao processar requisição /asaaspagamento:', error.message);
     // Certifique-se de capturar todos os tipos de erro e enviar uma resposta única aqui
