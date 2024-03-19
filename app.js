@@ -355,7 +355,7 @@ app.post('/asaaspagamento', async (req, res) => {
   } catch (error) {
     console.error('Erro ao processar requisição /asaaspagamento:', error.message);
     // Certifique-se de capturar todos os tipos de erro e enviar uma resposta única aqui
-    return res.status(500).send('Erro ao processar a requisição.');
+    return res.status(401).send('Erro ao processar a requisição.');
   }
 });
 
