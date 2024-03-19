@@ -304,51 +304,51 @@ app.post('/ploomeswin', async (req, res) => {
 
 app.post('/asaaspagamento', async (req, res) => {
   try {
-    const event = req.body.event
-    const payment = req.body.payment
+    const event = req.body.event;
+    const payment = req.body.payment;
 
-    const PIPELINE_TESTE = 50000676
-    const newStage = 50003845 // ETAPA 3
+    const PIPELINE_TESTE = 50000676;
+    const newStage = 50003845; // ETAPA 3
 
     const patchBody = {
       "StageId": newStage,
     };
 
     if (event !== "PAYMENT_RECEIVED") {
-      console.log('Evento de pagamento não correspondente')
+      console.log('Evento de pagamento não correspondente');
       return res.status(200).send('Evento de pagamento não correspondente.');
     }
 
-    console.log('Pagamento recebido')
+    console.log('Pagamento recebido');
 
-    await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
-          headers: {
-              'User-Key': process.env.PLOOMES_USER_KEY
-          }
-      })
-      .then(response => {
-        const dealId = response.data.Id
-        axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
-              headers: {
-                  'User-Key': process.env.PLOOMES_USER_KEY
-                  }
-        })
-        .then(response => {
-            console.log('[/asaaspagamento] Card movido para o próximo estágio.', response.data);
-            return res.status(200).send('Card movido para o próximo estágio com sucesso.');
-        })
-        .catch(error => {
-            console.error('[/asaaspagamento] Erro ao mover card para o próximo estágio.', error.response.data);
-            return res.status(500).send('Erro ao mover card para o próximo estágio.');
-        });
-      })
-      .catch(error => {
-        console.error('[/asaaspagamento] Erro no GET de Deals (Pipeline ou Title):', error.response.data);
-        return res.status(500).send('Erro ao criar registro de interação');
-      })
+    // Utilize await diretamente em vez de .then para simplificar o código
+    const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+      headers: {
+        'User-Key': process.env.PLOOMES_USER_KEY
+      }
+    });
 
+    // Supondo que a resposta inclua um array de "Deals", e você esteja interessado no primeiro
+    if (response.data && response.data.length > 0) {
+      const dealId = response.data[0].Id; // Ajuste isso de acordo com a estrutura real da resposta
+
+      await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
+        headers: {
+          'User-Key': process.env.PLOOMES_USER_KEY
+        }
+      });
+
+      console.log('[/asaaspagamento] Card movido para o próximo estágio.');
+      return res.status(200).send('Card movido para o próximo estágio com sucesso.');
+    } else {
+      // Se nenhum negócio corresponder, retorne uma resposta diferente
+      console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
+      return res.status(404).send('Nenhum negócio encontrado.');
+    }
   } catch (error) {
     console.error('Erro ao processar requisição /asaaspagamento:', error.message);
+    // Certifique-se de capturar todos os tipos de erro e enviar uma resposta única aqui
+    return res.status(500).send('Erro ao processar a requisição.');
   }
 });
 
