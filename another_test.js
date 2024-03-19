@@ -53,7 +53,7 @@ async function processPayment() {
     const payment = req.payment;
 
     const PIPELINE_TESTE = 50000676;
-    const newStage = 50003845; // ETAPA 3
+    const newStage = 50003844; // ETAPA 3
 
     const patchBody = {
       "StageId": newStage,

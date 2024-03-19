@@ -310,14 +310,17 @@ app.post('/asaaspagamento', async (req, res) => {
     const PIPELINE_TESTE = 50000676;
     const newStage = 50003845; // ETAPA 3
 
-    const patchBody = {
-      "StageId": newStage,
+    const pagoTrue = {
       "OtherProperties": [
         {
             "FieldKey": "deal_6DE22E98-7388-470D-9759-90941364B71D",
             "StringValue": "True"
         }
       ]
+    };
+
+    const nextStage = {
+      "StageId": newStage
     };
 
     if (event !== "PAYMENT_RECEIVED") {
@@ -329,16 +332,22 @@ app.post('/asaaspagamento', async (req, res) => {
 
     const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
       headers: {
-        'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+        'User-Key': process.env.PLOOMES_USER_KEY
       }
     });
 
     if (response.data.value && response.data.value.length > 0) {
       const dealId = response.data.value[0].Id;
 
-      await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
+      await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, pagoTrue, {
         headers: {
-          'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+          'User-Key': process.env.PLOOMES_USER_KEY
+        }
+      });
+
+      await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, nextStage, {
+        headers: {
+          'User-Key': process.env.PLOOMES_USER_KEY
         }
       });
 
