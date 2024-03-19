@@ -327,35 +327,31 @@ app.post('/asaaspagamento', async (req, res) => {
 
     console.log('Pagamento recebido');
 
-    // Utilize await diretamente em vez de .then para simplificar o código
     const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
       headers: {
-        'User-Key': process.env.PLOOMES_USER_KEY
+        'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
       }
     });
 
-    // Supondo que a resposta inclua um array de "Deals", e você esteja interessado no primeiro
     if (response.data.value && response.data.value.length > 0) {
-      const dealId = response.data.value[0].Id; // Ajuste isso de acordo com a estrutura real da resposta
+      const dealId = response.data.value[0].Id;
 
       await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
         headers: {
-          'User-Key': process.env.PLOOMES_USER_KEY
+          'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
         }
       });
 
       console.log('[/asaaspagamento] Card movido para o próximo estágio.');
-      
     } else {
-      // Se nenhum negócio corresponder, retorne uma resposta diferente
       console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
-      return;
+      return res.status(404).send('Nenhum negócio encontrado com a descrição fornecida.');
     }
+
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
     console.error('Erro ao processar requisição /asaaspagamento:', error.message);
-    // Certifique-se de capturar todos os tipos de erro e enviar uma resposta única aqui
-    return res.status(401).send('Erro ao processar a requisição.');
+    return res.status(500).send('Erro ao processar a requisição.');
   }
 });
 

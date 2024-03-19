@@ -1,224 +1,103 @@
+// Certifique-se de importar o axios ou incluí-lo no seu projeto
 const axios = require('axios');
-require('dotenv').config();
-const admin = require('firebase-admin');
 
-const serviceAccount = require('./ploomes-webhook-firebase-adminsdk-qa6or-63a88d0737.json');
+// Envolve o código em uma função assíncrona para poder usar await
+async function processPayment() {
+  try {
+    const req = {
+      "event": "PAYMENT_RECEIVED",
+      "payment": {
+        "anticipable": false,
+        "anticipated": false,
+        "bankSlipUrl": "https://sandbox.asaas.com/b/pdf/80h7s7wdzzsc6pdn",
+        "billingType": "BOLETO",
+        "canBePaidAfterDueDate": true,
+        "clientPaymentDate": "2024-03-19",
+        "confirmedDate": "2024-03-19",
+        "creditDate": "2024-03-19",
+        "customer": "cus_000005928250",
+        "dateCreated": "2024-03-19",
+        "deleted": false,
+        "description": "Teste Asaas",
+        "discount": {
+          "dueDateLimitDays": 0,
+          "type": "PERCENTAGE",
+          "value": 0
+        },
+        "dueDate": "2024-03-26",
+        "estimatedCreditDate": "2024-03-19",
+        "fine": {
+          "type": "PERCENTAGE",
+          "value": 0
+        },
+        "id": "pay_80h7s7wdzzsc6pdn",
+        "interest": {
+          "type": "PERCENTAGE",
+          "value": 0
+        },
+        "invoiceNumber": "05309358",
+        "invoiceUrl": "https://sandbox.asaas.com/i/80h7s7wdzzsc6pdn",
+        "netValue": 14.01,
+        "nossoNumero": "1515612",
+        "object": "payment",
+        "originalDueDate": "2024-03-26",
+        "paymentDate": "2024-03-19",
+        "postalService": false,
+        "status": "RECEIVED",
+        "transactionReceiptUrl": "https://sandbox.asaas.com/comprovantes/7669377126646840",
+        "value": 15
+      }
+    };
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://ploomes-webhook-default-rtdb.firebaseio.com/'
-});
+    const event = req.event;
+    const payment = req.payment;
 
-const db = admin.database();
-const ref = db.ref('/calls');
+    const PIPELINE_TESTE = 50000676;
+    const newStage = 50003845; // ETAPA 3
 
-  const converx = {
-    "name": "Pessoa Teste Node",
-    "phone": "(+54) 99698-2868",
-    "account": 196,
-    "template": "atualizacao_servico",
-    "inbox_id": 605,
-    "parameter_1": "Pessoa Teste Node",
-    "parameter_2": "Teste",
-    "parameter_3": "Etapa 2",
-    "flow": "Notificação de atualização no estado do serviço"
-  }
-
-  function secondsToMinutes(durationInSeconds) {
-    // Divida a duração em segundos pelo número de segundos em um minuto (60)
-    const minutes = Math.floor(durationInSeconds / 60);
-    // O resto da divisão são os segundos restantes
-    const seconds = durationInSeconds % 60;
-    // Retorne a duração formatada como "minutos:segundos"
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-}
-
-function getCurrentDateTime() {
-  const now = new Date();
-
-  // Definir o fuso horário para Brasília
-  const options = { timeZone: 'America/Sao_Paulo' };
-
-  // Formatar a data e hora atual no fuso horário de Brasília
-  const brazilDateTime = now.toLocaleString('en-US', options);
-
-  // Converter a data e hora para uma string ISO 8601
-  const isoDateTime = new Date(brazilDateTime).toISOString();
-
-  // Retornar a data e hora formatada no formato ISO 8601
-  return isoDateTime;
-}
-
-function formatDateTime(inputDateTime) {
-  // Divide a string da data e hora em partes
-  const parts = inputDateTime.split(' ');
-  const datePart = parts[0];
-  const timePart = parts[1];
-
-  // Divide a parte da data em partes
-  const dateParts = datePart.split('-');
-  const year = dateParts[0];
-  const month = dateParts[1];
-  const day = dateParts[2];
-
-  // Retorna a data no formato desejado
-  return `${day}/${month}/${year} - ${timePart.substring(0, 5)}`;
-}
-
-
-
-  const test = {
-    "logentry": {
-    "account_id": 10929,
-    "adgroup_id": 40380,
-    "adgroup_name": "Offline",
-    "advert_id": 50370,
-    "advert_name": "Cartões de Visita",
-    "audio_record": "https://storage.googleapis.com/records-partner-001/eab4b256-3295-44da-9b35-3bf7c74cd1d7.wav",
-    "b_hangup_cause": "no_answer",
-    "b_status": "completed",
-    "bill_duration": 60,
-    "bill_rate": "0.00000",
-    "call_id": "1709240438.2648",
-    "call_metadata": {
-    "call_duration": "41.220",
-    "call_id": "1709240438.2648",
-    "call_score": 1,
-    "called_talk_pct": "0.00",
-    "caller_talk_pct": "0.00",
-    "cross_talk_pct": "0.00",
-    "gender_consumer_accuracy_pct": "0.00",
-    "is_incomplete": true,
-    "is_manual_sentiment": false,
-    "is_mono": true,
-    "last_speaker_agent": "s",
-    "manual_gender": false,
-    "plead": false,
-    "rings_count": 0,
-    "rings_count_before": 0,
-    "silence_time_sec": 24,
-    "wait_time_sec": 43
-    },
-    "campaign_id": 26599,
-    "campaign_name": "Padrão",
-    "client_id": 25351,
-    "client_name": " APEX PROPRIEDADE INTELECTUAL",
-    "date_answer": {
-    "date": "29 Feb",
-    "time": "18:00:38"
-    },
-    "date_answer_tz": {
-    "date": "2024-02-29 18:00:38.000000",
-    "timezone": "America/Sao_Paulo",
-    "timezone_type": 3
-    },
-    "date_end": {
-    "date": "29 Feb",
-    "time": "18:01:33"
-    },
-    "date_end_tz": {
-    "date": "2024-02-29 18:01:33.000000",
-    "timezone": "America/Sao_Paulo",
-    "timezone_type": 3
-    },
-    "date_in": {
-    "date": "29 Feb",
-    "time": "21:00:38"
-    },
-    "date_in_tz": {
-    "date": "2024-02-29 21:00:38.000000",
-    "timezone": "America/Sao_Paulo",
-    "timezone_type": 3
-    },
-    "date_start": {
-    "date": "29 Feb",
-    "time": "18:00:38"
-    },
-    "date_start_tz": {
-    "date": "2024-02-29 18:00:38.000000",
-    "timezone": "America/Sao_Paulo",
-    "timezone_type": 3
-    },
-    "deleted_at": "",
-    "destination_formatted": "1018907003",
-    "destination_number": "551018907003",
-    "dialled_formatted": "+0",
-    "dialled_number": "0",
-    "duration": 55,
-    "failed": 1,
-    "first_call_consumer": 0,
-    "hangup_cause": "no_answer",
-    "id": 70880353,
-    "menu_ura": "",
-    "origin_formatted": "(54) 93211-3211",
-    "origin_number": "5594981022549",
-    "origin_number_ignored": 0,
-    "player_link": "https://phonetrack.app/public/call-log/details-iframe/1709240438.2648/fb938fa1-d738-11ee-89b0-42010a947809/722a0122c262772eba4f16272ef8be2e",
-    "status": "completed",
-    "type_call": "O"
-    },
-    "topic": "client#25351",
-    "type": "hangup"
-    }
-
-    const phoneNumber = test.logentry.origin_formatted;
-    const audioRecord = test.logentry.audio_record;
-    const consumerCalled = test.logentry.first_call_consumer;
-    const duration = test.logentry.duration;
-    const callDateTz = test.logentry.date_answer_tz.date;
-    const callDate = formatDateTime(callDateTz)
-    const callDuration = secondsToMinutes(duration)
-    let callType;
-    if (consumerCalled === 0) {
-      callType = 'Ligação Realizada'    
-    } else {
-      callType = 'Ligação Recebida'
-    }
-
-    axios.get(`https://api2.ploomes.com/Contacts?$expand=Phones&$filter=Phones/any(phone: phone/PhoneNumber eq '${phoneNumber}')&$orderby=TypeId desc`, {
-        headers: {
-            'User-Key': process.env.PLOOMES_USER_KEY
+    const patchBody = {
+      "StageId": newStage,
+      "OtherProperties": [
+        {
+          "FieldKey": "deal_6DE22E98-7388-470D-9759-90941364B71D",
+          "StringValue": "True"
         }
-    })
-    .then(response => {
-      
-        if (response.data.value.length === 0) {
-          console.log('Contato não encontrado.');
-          return; // Não prossiga se não houver nenhum contato encontrado
-      }
-        const contact = response.data.value[0];
+      ]
+    };
 
-        
-        const dateNow = getCurrentDateTime();
-        //console.log(contact)
+    if (event !== "PAYMENT_RECEIVED") {
+      console.log('Evento de pagamento não correspondente');
+      return;
+    }
 
-        const interactionRecord = {
-          "ContactId": contact.Id,
-          "DealId": null,
-          "Date": dateNow,
-          "Content": `${callType}: ${audioRecord}\nDuração: ${callDuration}\nData: ${callDate}`,
-          "TypeId": contact.TypeId,
-          "OtherProperties": [
-              {
-                  "FieldKey": "interaction_record_250E00F0-0DF7-4026-96F8-9029A7D76D8F",
-                  "IntegerValue": 13
-              }
-          ]
-      }
+    console.log('Pagamento recebido');
 
-      axios.post('https://api2.ploomes.com/InteractionRecords', interactionRecord, {
+    const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
       headers: {
-          'User-Key': process.env.PLOOMES_USER_KEY
-          }
-      })
-      .then(response => {
-          console.log('Registro de interação registrado com sucesso:', response.data);
-      })
-      .catch(error => {
-          console.error('Erro ao criar registro de interação:', error.response.data);
-      });
-  
-    })
-    .catch(error => {
-        console.error('Erro ao buscar o contato:', error);
+        'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+      }
     });
+
+    if (response.data.value && response.data.value.length > 0) {
+      const dealId = response.data.value[0].Id;
+
+      await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, patchBody, {
+        headers: {
+          'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+        }
+      });
+
+      console.log('[/asaaspagamento] Card movido para o próximo estágio.');
+    } else {
+      console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
+      return;
+    }
+
+    console.log("Processo finalizado com sucesso.");
+  } catch (error) {
+    console.error('Erro ao processar requisição /asaaspagamento:', error.message);
+  }
+}
+
+// Lembre-se de chamar a função
+processPayment();
