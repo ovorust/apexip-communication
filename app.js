@@ -312,6 +312,12 @@ app.post('/asaaspagamento', async (req, res) => {
 
     const patchBody = {
       "StageId": newStage,
+      "OtherProperties": [
+        {
+            "FieldKey": "deal_6DE22E98-7388-470D-9759-90941364B71D",
+            "StringValue": "True"
+        }
+      ]
     };
 
     if (event !== "PAYMENT_RECEIVED") {
