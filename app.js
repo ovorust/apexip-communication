@@ -303,6 +303,48 @@ app.post('/ploomeswin', async (req, res) => {
   }
 });
 
+app.post('/ploomesnew', async (req, res) => {
+  try {
+    const { ContactName, PipelineId, Title } = req.body.New;
+
+    // PIPELINE COMERCIAL (NACIONAL)
+    if (PipelineId !== 10015005) {
+      return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
+    }
+
+    res.status(200).send('Processando a requisição...'); // Resposta imediata ao webhook
+
+    const requestBody = {
+      "name": Title,
+      "assignees": [],
+      "tags": ["ploomes"],
+      "status": "To do",
+      "due_date_time": false,
+      "start_date_time": false,
+      "notify_all": false,
+      "parent": null,
+      "links_to": null,
+      "check_required_custom_fields": true,
+      "custom_fields": [
+      {
+      "id": "e1f8157c-af5d-455a-b6c8-07771c482779",
+      "value": ContactName
+      }
+      ]
+      };
+
+    await axios.post(`https://api.clickup.com/api/v2/list/901103087671/task`, requestBody, {
+      headers: {
+        'Authorization': 'pk_75429419_ZT8345CO82TTH22D2MZJXN3QVRUXP7OA',
+      }
+    });
+
+    console.log('[/ploomesnew] Card criado!');
+  } catch (error) {
+    console.error('Erro ao processar requisição /ploomesnew:', error.message);
+  }
+});
+
 app.post('/asaaspagamento_mudardepois', async (req, res) => {
   try {
     const event = req.body.event;
@@ -404,6 +446,35 @@ app.post('/stripeinvoice', async (req, res) => {
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
     console.error('[/stripeinvoice] Erro ao processar requisição /stripeinvoice:', error.message);
+    return res.status(500).send('Erro ao processar a requisição.');
+  }
+});
+
+app.post('/newclient', async (req, res) => {
+  try {
+
+    const { Name } = req.body.New;
+
+    const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
+          headers: {
+              'User-Key': process.env.PLOOMES_USER_KEY
+          }
+      })
+
+    let emailCliente = getContacts.value[0].Email
+    if (getContacts.value.length <= 0) {
+      console.log(`[/newclient] E-mail não encontrado para o cliente ${Name}`)
+      emailCliente = 'desconhecido@apexip.com'
+    }
+    const customer = await stripe.customers.create({
+      name: Name,
+      email: emailCliente,
+    });
+
+
+    return res.status(200).send('Processo finalizado com sucesso.');
+  } catch (error) {
+    console.error('[/newclient] Erro ao processar requisição /newclient:', error.message);
     return res.status(500).send('Erro ao processar a requisição.');
   }
 });
