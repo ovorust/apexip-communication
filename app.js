@@ -370,7 +370,7 @@ app.post('/stripeinvoice', async (req, res) => {
 
     const { ContactName, Amount, PipelineId, Title, StageId } = req.body.New;
 
-    if (PipelineId !== 50000676 && StageId !== 50003845) {
+    if (PipelineId !== 50000676 || StageId !== 50003845) {
       console.log('[/stripeinvoice] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
