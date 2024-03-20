@@ -463,11 +463,12 @@ app.post('/newclient', async (req, res) => {
     let emailCliente = 'teste@gmail.com';
     if (getContacts.data.value.length > 0) {
       emailCliente = getContacts.data.value[0].Email;
+      console.log('O email da Ploomes é: ', emailCliente)
     } else {
       console.log(`[/newclient] E-mail não encontrado para o cliente ${Name}`);
       emailCliente = 'desconhecido@apexip.com';
     }
-
+    console.log('Email final: ', emailCliente)
     const customer = await stripe.customers.create({
       name: Name,
       email: emailCliente,
