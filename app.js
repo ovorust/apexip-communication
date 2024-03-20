@@ -460,9 +460,11 @@ app.post('/newclient', async (req, res) => {
       }
     });
 
+    const emailContacts = getContacts.data.value[0].Email
+
     const customer = await stripe.customers.create({
       name: Name,
-      email: getContacts.data.value[0].Email,
+      email: emailContacts,
     });
     console.log('[/newclient] Cliente cadastrado com sucesso na Stripe')
     return res.status(200).send('Processo finalizado com sucesso.');
