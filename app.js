@@ -474,7 +474,7 @@ app.post('/newclient', async (req, res) => {
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoXzA3ZjgwMTVjLTJiYzgtNDZjYS04YzUxLTQ3NzFhZGU2MTg3Mg=='
+        access_token: process.env.ASAAS_ACCESS_KEY
       },
       data: {
         name: Name,
