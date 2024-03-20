@@ -460,7 +460,7 @@ app.post('/newclient', async (req, res) => {
       }
     });
 
-    let emailCliente;
+    let emailCliente = 'teste@gmail.com';
     if (getContacts.data.value.length > 0) {
       emailCliente = getContacts.data.value[0].Email;
     } else {
@@ -472,7 +472,7 @@ app.post('/newclient', async (req, res) => {
       name: Name,
       email: emailCliente,
     });
-
+    console.log('[/newclient] Cliente cadastrado com sucesso na Stripe')
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
     console.error('[/newclient] Erro ao processar requisição /newclient:', error.message);
