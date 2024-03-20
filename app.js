@@ -302,7 +302,7 @@ app.post('/ploomeswin', async (req, res) => {
   }
 });
 
-app.post('/asaaspagamento', async (req, res) => {
+app.post('/asaaspagamento_mudardepois', async (req, res) => {
   try {
     const event = req.body.event;
     const payment = req.body.payment;
@@ -354,12 +354,55 @@ app.post('/asaaspagamento', async (req, res) => {
       console.log('[/asaaspagamento] Card movido para o próximo estágio.');
     } else {
       console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
-      return res.status(404).send('Nenhum negócio encontrado com a descrição fornecida.');
+      return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
     }
 
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
-    console.error('Erro ao processar requisição /asaaspagamento:', error.message);
+    console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
+    return res.status(500).send('Erro ao processar a requisição.');
+  }
+});
+
+app.post('/stripeinvoice', async (req, res) => {
+  try {
+
+    const { ContactName, Amount, PipelineId, Title, StageId } = req.body.New;
+
+    if (PipelineId !== 50000676 && StageId !== 50003845) {
+      console.log('[/stripeinvoice] Pipeline não correspondente.')
+      return res.status(200).send('Pipeline não correspondente.')
+    }
+
+    const valorEmCentavos = Math.round(Amount * 100)
+
+    const customers = await stripe.customers.search({
+      query: `name:\'${ContactName}\'`,
+    });
+
+    if (customers.data.length == 0) {
+      console.log('[/stripeinvoice] Nenhum cliente encontrado na Stripe')
+    }
+
+    const customer_id = customers.data[0].id;
+
+    await stripe.invoiceItems.create({
+      customer: customer_id,
+      amount: valorEmCentavos, // O valor deve ser especificado em centavos (R$1,00)
+      currency: 'brl', // Definindo a moeda para Real Brasileiro
+      description: Title,
+    });
+
+    const invoice = await stripe.invoices.create({
+      customer: customer_id,
+    });
+
+    console.log('[/stripeinvoice] Invoice criado com sucesso!')
+
+
+    return res.status(200).send('Processo finalizado com sucesso.');
+  } catch (error) {
+    console.error('[/stripeinvoice] Erro ao processar requisição /stripeinvoice:', error.message);
     return res.status(500).send('Erro ao processar a requisição.');
   }
 });
