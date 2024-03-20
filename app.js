@@ -460,7 +460,6 @@ app.post('/newclient', async (req, res) => {
       }
     });
 
-    console.log('Email final: ', emailCliente)
     const customer = await stripe.customers.create({
       name: Name,
       email: getContacts.data.value[0].Email,
