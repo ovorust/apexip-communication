@@ -452,7 +452,7 @@ app.post('/stripeinvoice', async (req, res) => {
 
 app.post('/newclient', async (req, res) => {
   try {
-    const { Name } = req.body.New;
+    const { Name, CNPJ, CPF } = req.body.New;
 
     const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
       headers: {
@@ -467,6 +467,26 @@ app.post('/newclient', async (req, res) => {
       email: emailContacts,
     });
     console.log('[/newclient] Cliente cadastrado com sucesso na Stripe')
+
+    const url = 'https://sandbox.asaas.com/api/v3/customers';
+    const options = {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoXzA3ZjgwMTVjLTJiYzgtNDZjYS04YzUxLTQ3NzFhZGU2MTg3Mg=='
+      },
+      data: {
+        name: Name,
+        email: emailContacts,
+        cpfCnpj: CNPJ || CPF
+      }
+    };
+
+    axios(url, options)
+      .then(response => console.log('[/newclient] Cliente cadastrado com sucesso na Asaas', response.status))
+      .catch(error => console.error('error:', error));
+      
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
     console.error('[/newclient] Erro ao processar requisição /newclient:', error.message);

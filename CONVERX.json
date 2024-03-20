@@ -1,0 +1,10 @@
+{
+    "name": "NOME DO CLIENTE",
+    "phone": "TELEFONE DO CLIENTE",
+    "account": 196,
+    "template": "NOME DO TEMPLATE",
+    "inbox_id": 605,
+    "parameter_1": "OPCIONAL: SE A MENSAGEM TIVER 1 PARAMETRO",
+   "parameter_2": "OPCIONAL: SE A MENSAGEM TIVER 2 PARAMETRO",
+    "flow": "NOME DO PROCESSO QUE ESTÁ ENVIANDO A MENSAGEM"
+}

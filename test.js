@@ -3,29 +3,24 @@ const axios = require('axios');
 
 async function createInvoice() {
 
-  const nome_cliente = 'Cliente Teste'
-
-  const Name = 'Cliente Teste Email'
-
-  try {
-    const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
+  const url = 'https://sandbox.asaas.com/api/v3/customers';
+    const options = {
+      method: 'POST',
       headers: {
-        'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+        accept: 'application/json',
+        'content-type': 'application/json',
+        access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoXzA3ZjgwMTVjLTJiYzgtNDZjYS04YzUxLTQ3NzFhZGU2MTg3Mg=='
+      },
+      data: {
+        name: 'John Doe',
+        email: 'john.doe@asaas.com.br',
+        cpfCnpj: '24971563792'
       }
-    });
+    };
 
-    let emailCliente
-    emailCliente = getContacts.data.value[0].Email;
-    if (emailCliente == null) {
-      emailCliente = 'teste@gmail.com'
-    }
-
-
-    console.log(emailCliente)
-
-  } catch (error) {
-    console.error(error);
-  }
+    axios(url, options)
+      .then(response => console.log(response.data))
+      .catch(error => console.error('error:', error));
 }
 
 createInvoice();
