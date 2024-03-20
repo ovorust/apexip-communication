@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
-const stripe = require('stripe')('sk_test_51IxCKXABvtJ4kGz27uhcukCG3zqbK1uipQw6CEXuGnvzC7GPkJDfy7DSi0RPTp8LiZmOYqoIQ3RTotkJ25LggCX8002csKVQdC');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -452,25 +452,26 @@ app.post('/stripeinvoice', async (req, res) => {
 
 app.post('/newclient', async (req, res) => {
   try {
-
     const { Name } = req.body.New;
 
     const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
-          headers: {
-              'User-Key': process.env.PLOOMES_USER_KEY
-          }
-      })
+      headers: {
+        'User-Key': process.env.PLOOMES_USER_KEY
+      }
+    });
 
-    let emailCliente = getContacts.value[0].Email
-    if (getContacts.value.length <= 0) {
-      console.log(`[/newclient] E-mail não encontrado para o cliente ${Name}`)
-      emailCliente = 'desconhecido@apexip.com'
+    let emailCliente;
+    if (getContacts.data.value.length > 0) {
+      emailCliente = getContacts.data.value[0].Email;
+    } else {
+      console.log(`[/newclient] E-mail não encontrado para o cliente ${Name}`);
+      emailCliente = 'desconhecido@apexip.com';
     }
+
     const customer = await stripe.customers.create({
       name: Name,
       email: emailCliente,
     });
-
 
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
