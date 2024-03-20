@@ -470,11 +470,6 @@ app.post('/newclient', async (req, res) => {
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
     console.error('[/newclient] Erro ao processar requisição /newclient:', error.message);
-    if (!getContacts || !getContacts.data || !getContacts.data.value || getContacts.data.value.length === 0) {
-      console.error('O problema parece estar na obtenção dos contatos ou na estrutura da resposta.');
-    } else if (!getContacts.data.value[0].Email) {
-      console.error('Email não encontrado no primeiro contato retornado.');
-    }
     return res.status(500).send('Erro ao processar a requisição.');
   }
 });
