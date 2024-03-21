@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { format } = require('date-fns');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -345,13 +346,16 @@ app.post('/ploomesnew', async (req, res) => {
   }
 });
 
-app.post('/asaaspagamento_mudardepois', async (req, res) => {
+app.post('/asaaspagamento', async (req, res) => {
   try {
     const event = req.body.event;
     const payment = req.body.payment;
 
     const PIPELINE_TESTE = 50000676;
     const newStage = 50003845; // ETAPA 3
+
+    const dataAtual = new Date();
+    const dataFormatada = format(dataAtual, 'dd/MM/yyyy');  
 
     const pagoTrue = {
       "OtherProperties": [
@@ -362,49 +366,78 @@ app.post('/asaaspagamento_mudardepois', async (req, res) => {
       ]
     };
 
+    const aplicarDataCobranca = {
+      "OtherProperties": [
+        {
+            "FieldKey": "deal_5F5D9E86-F0DF-4063-AD70-7FF2F9F2F7C9",
+            "StringValue": dataFormatada
+        }
+      ]
+    }
+
     const nextStage = {
       "StageId": newStage
     };
 
-    if (event !== "PAYMENT_RECEIVED") {
-      console.log('Evento de pagamento não correspondente');
-      return res.status(200).send('Evento de pagamento não correspondente.');
-    }
+    if (event === "PAYMENT_CREATED") {
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+        headers: {
+          'User-Key': process.env.PLOOMES_USER_KEY
+        }
+      });
 
-    console.log('Pagamento recebido');
+      if (response.data.value && response.data.value.length > 0) {
+        const dealId = response.data.value[0].Id;
 
-    const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
-      headers: {
-        'User-Key': process.env.PLOOMES_USER_KEY
+        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, aplicarDataCobranca, {
+          headers: {
+            'User-Key': process.env.PLOOMES_USER_KEY
+          }
+        });
+      } else {
+        console.log('[/asaaspagamento] Pagamento criado e data de cobrança definida.');
+        return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
       }
-    });
-
-    if (response.data.value && response.data.value.length > 0) {
-      const dealId = response.data.value[0].Id;
-
-      await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, pagoTrue, {
-        headers: {
-          'User-Key': process.env.PLOOMES_USER_KEY
-        }
-      });
-
-      await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, nextStage, {
-        headers: {
-          'User-Key': process.env.PLOOMES_USER_KEY
-        }
-      });
-
-      console.log('[/asaaspagamento] Card movido para o próximo estágio.');
-    } else {
-      console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
-      return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
     }
 
-    return res.status(200).send('Processo finalizado com sucesso.');
-  } catch (error) {
-    console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
-    return res.status(500).send('Erro ao processar a requisição.');
-  }
+    if (event === "PAYMENT_RECEIVED") {
+      console.log('Pagamento recebido');
+
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+        headers: {
+          'User-Key': process.env.PLOOMES_USER_KEY
+        }
+      });
+
+      if (response.data.value && response.data.value.length > 0) {
+        const dealId = response.data.value[0].Id;
+
+        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, pagoTrue, {
+          headers: {
+            'User-Key': process.env.PLOOMES_USER_KEY
+          }
+        });
+
+        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, nextStage, {
+          headers: {
+            'User-Key': process.env.PLOOMES_USER_KEY
+          }
+        });
+
+        console.log('[/asaaspagamento] Card movido para o próximo estágio.');
+      } else {
+        console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
+        return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
+      }
+    }
+
+      
+
+      return res.status(200).send('Processo finalizado com sucesso.');
+    } catch (error) {
+      console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
+      return res.status(500).send('Erro ao processar a requisição.');
+    }
 });
 
 app.post('/stripeinvoice', async (req, res) => {
@@ -412,6 +445,7 @@ app.post('/stripeinvoice', async (req, res) => {
 
     const { ContactName, Amount, PipelineId, Title, StageId } = req.body.New;
 
+    // PIPELINE FUNIL SERVIÇOS (EXTERIOR): 10015008      ETAPA FINANCEIRA: 10078298
     if (PipelineId !== 50000676 || StageId !== 50003845) {
       console.log('[/stripeinvoice] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
