@@ -394,8 +394,9 @@ app.post('/asaaspagamento', async (req, res) => {
             'User-Key': process.env.PLOOMES_USER_KEY
           }
         });
-      } else {
         console.log('[/asaaspagamento] Pagamento criado e data de cobrança definida.');
+      } else {
+        console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
         return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
       }
     }
@@ -502,7 +503,8 @@ app.post('/newclient', async (req, res) => {
     });
     console.log('[/newclient] Cliente cadastrado com sucesso na Stripe')
 
-    const url = 'https://sandbox.asaas.com/api/v3/customers';
+    // ENDPOINT DO SANDBOX: https://sandbox.asaas.com/api/v3/customers
+    const url = 'https://api.asaas.com/v3/customers';
     const options = {
       method: 'POST',
       headers: {
