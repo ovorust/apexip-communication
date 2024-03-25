@@ -445,7 +445,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
   try {
       const {Title, PipelineId, StageId, ContactName, Amount} = req.body.New;
 
-      if (PipelineId !== 50000676 || StageId !== 50003844) {
+      if (StageId !== 50003844) {
         console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
         return res.status(200).send('Pipeline não correspondente.')
       }
