@@ -441,6 +441,57 @@ app.post('/asaaspagamento', async (req, res) => {
     }
 });
 
+app.post('/asaascriacaopagamento', async (req, res) => {
+  try {
+      const {Title, PipelineId, StageId, ContactName, Amount} = req.body.New;
+
+      if (PipelineId !== 50000676 && StageId !== 50003844) {
+        console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
+        return res.status(200).send('Pipeline não correspondente.')
+      }
+
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
+        headers: {
+          'User-Key': process.env.PLOOMES_USER_KEY
+        }
+      });
+
+      const clienteGet = await axios.get(`https://sandbox.asaas.com/api/v3/customers?name=${ContactName}`, {
+        headers: {
+          'Accept': 'application/json',
+          'access_token': process.env.ASAAS_SANDBOX_KEY
+        }
+      })
+
+      const idCliente = clienteGet.data.data[0].id
+
+      const data = {
+        billingType: 'UNDEFINED',
+        customer: idCliente,
+        value: Amount,
+        description: Title,
+
+      };
+
+
+      const criarCobranca = await axios.post('https://api.asaas.com/v3/payments', data, {
+        headers: {
+          'Accept': 'application/json',
+          'access_token': process.env.ASAAS_SANDBOX_KEY
+        }
+    })
+
+    
+
+      console.log("[/asaascriacaopagamento] Cobrança criada com sucesso!")
+
+      return res.status(200).send('Processo finalizado com sucesso.');
+    } catch (error) {
+      console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
+      return res.status(500).send('Erro ao processar a requisição.');
+    }
+});
+
 app.post('/stripeinvoice', async (req, res) => {
   try {
 
