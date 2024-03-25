@@ -354,9 +354,6 @@ app.post('/asaaspagamento', async (req, res) => {
     const PIPELINE_TESTE = 50000676;
     const newStage = 50003845; // ETAPA 3
 
-    const dataAtual = new Date();
-    const dataFormatada = format(dataAtual, 'dd/MM/yyyy');  
-
     const pagoTrue = {
       "OtherProperties": [
         {
@@ -429,6 +426,9 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       return res.status(200).send('Pipeline não correspondente.')
     }
 
+    const dataAtual = new Date();
+    const dataFormatada = format(dataAtual, 'dd/MM/yyyy'); 
+
     function getCurrentDate(addDays = 0) {
       const today = new Date();
       today.setDate(today.getDate() + addDays);
@@ -478,6 +478,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
         }
       ]
     }
+   
 
     await axios.patch(`https://api2.ploomes.com/Deals(${Id})`, aplicarDataCobranca, {
       headers: {
