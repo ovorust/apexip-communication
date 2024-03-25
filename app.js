@@ -443,72 +443,65 @@ app.post('/asaaspagamento', async (req, res) => {
 
 app.post('/asaascriacaopagamento', async (req, res) => {
   try {
-    const cardsComCobrancaCriada = new Set();
-    const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
+      const {Title, PipelineId, StageId, ContactName, Amount} = req.body.New;
 
-    // Verifique se o StageId é igual ao estágio específico
-    if (StageId !== 50003844) {
-      console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
-      return res.status(200).send('Pipeline não correspondente.')
-    }
-
-    // Verifique se uma cobrança já foi criada para este card
-    if (cardsComCobrancaCriada.has(Title)) {
-      console.log(`[/asaascriacaopagamento] Cobrança já criada para o card com o título ${Title}.`)
-      return res.status(200).send('Cobrança já criada para este card.');
-    }
-
-    function getCurrentDate(addDays = 0) {
-      const today = new Date();
-      today.setDate(today.getDate() + addDays);
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    const response = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
-      headers: {
-        'User-Key': process.env.PLOOMES_USER_KEY
+      if (StageId !== 50003844) {
+        console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
+        return res.status(200).send('Pipeline não correspondente.')
       }
-    });
 
-    const clienteGet = await axios.get(`https://sandbox.asaas.com/api/v3/customers?name=${ContactName}`, {
-      headers: {
-        'Accept': 'application/json',
-        'access_token': process.env.ASAAS_SANDBOX_KEY
+      function getCurrentDate(addDays = 0) {
+        const today = new Date();
+        today.setDate(today.getDate() + addDays); // Adiciona os dias especificados
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // Adiciona zero à esquerda se for menor que 10
+        const day = String(today.getDate()).padStart(2, '0'); // Adiciona zero à esquerda se for menor que 10
+        return `${year}-${month}-${day}`;
       }
+
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
+        headers: {
+          'User-Key': process.env.PLOOMES_USER_KEY
+        }
+      });
+
+      const clienteGet = await axios.get(`https://sandbox.asaas.com/api/v3/customers?name=${ContactName}`, {
+        headers: {
+          'Accept': 'application/json',
+          'access_token': process.env.ASAAS_SANDBOX_KEY
+        }
+      })
+
+      const idCliente = clienteGet.data.data[0].id
+
+      const data = {
+        billingType: 'UNDEFINED',
+        customer: idCliente,
+        value: Amount,
+        description: Title,
+        dueDate: getCurrentDate(7)
+
+      };
+
+      console.log(data)
+
+
+      const criarCobranca = await axios.post('https://sandbox.asaas.com/api/v3/payments', data, {
+        headers: {
+          'Accept': 'application/json',
+          'access_token': process.env.ASAAS_SANDBOX_KEY
+        }
     })
 
-    const idCliente = clienteGet.data.data[0].id
+    
 
-    const data = {
-      billingType: 'UNDEFINED',
-      customer: idCliente,
-      value: Amount,
-      description: Title,
-      dueDate: getCurrentDate(7)
-    };
+      console.log("[/asaascriacaopagamento] Cobrança criada com sucesso!")
 
-    console.log(data)
-
-    const criarCobranca = await axios.post('https://sandbox.asaas.com/api/v3/payments', data, {
-      headers: {
-        'Accept': 'application/json',
-        'access_token': process.env.ASAAS_SANDBOX_KEY
-      }
-    })
-
-    // Registre o ID do card para o qual a cobrança foi criada
-    cardsComCobrancaCriada.add(Title);
-
-    console.log("[/asaascriacaopagamento] Cobrança criada com sucesso!")
-
-    return res.status(200).send('Processo finalizado com sucesso.');
-  } catch (error) {
-    console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
-    return res.status(500).send('Erro ao processar a requisição.');
-  }
+      return res.status(200).send('Processo finalizado com sucesso.');
+    } catch (error) {
+      console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
+      return res.status(500).send('Erro ao processar a requisição.');
+    }
 });
 
 app.post('/stripeinvoice', async (req, res) => {
