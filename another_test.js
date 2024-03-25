@@ -39,9 +39,11 @@ async function testFunction() {
       customer: idCliente,
       value: Amount,
       description: Title,
-      dueDate: getCurrentDate()
+      dueDate: '2024-03-26'
 
     };
+    
+    console.log(data)
 
 
     const criarCobranca = await axios.post('https://sandbox.asaas.com/api/v3/payments', data, {
