@@ -450,6 +450,15 @@ app.post('/asaascriacaopagamento', async (req, res) => {
         return res.status(200).send('Pipeline não correspondente.')
       }
 
+      function getCurrentDate(addDays = 0) {
+        const today = new Date();
+        today.setDate(today.getDate() + addDays); // Adiciona os dias especificados
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // Adiciona zero à esquerda se for menor que 10
+        const day = String(today.getDate()).padStart(2, '0'); // Adiciona zero à esquerda se for menor que 10
+        return `${year}-${month}-${day}`;
+      }
+
       const response = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
@@ -470,8 +479,11 @@ app.post('/asaascriacaopagamento', async (req, res) => {
         customer: idCliente,
         value: Amount,
         description: Title,
+        dueDate: getCurrentDate(7)
 
       };
+
+      console.log(data)
 
 
       const criarCobranca = await axios.post('https://sandbox.asaas.com/api/v3/payments', data, {
@@ -571,7 +583,7 @@ app.post('/newclient', async (req, res) => {
     };
 
     axios(url, options)
-      .then(response => console.log('[/newclient] Cliente cadastrado com sucesso na Asaas', response.status))
+      .then(response => console.log('[/newclient] Cliente cadastrado com sucesso na Asaas'))
       .catch(error => console.error('error:', error));
       
     return res.status(200).send('Processo finalizado com sucesso.');
