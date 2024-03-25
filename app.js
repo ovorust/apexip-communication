@@ -441,8 +441,6 @@ app.post('/asaaspagamento', async (req, res) => {
     }
 });
 
-const cardsComCobrancaTentada = new Set();
-
 app.post('/asaascriacaopagamento', async (req, res) => {
   try {
     const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
@@ -451,12 +449,6 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     if (StageId !== 50003844) {
       console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
-    }
-
-    // Verifique se uma cobrança já foi tentada para este card
-    if (cardsComCobrancaTentada.has(Title)) {
-      console.log(`[/asaascriacaopagamento] Cobrança já tentada para o card com o título ${Title}.`)
-      return res.status(200).send('Cobrança já tentada para este card.');
     }
 
     function getCurrentDate(addDays = 0) {
@@ -500,12 +492,10 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       }
     })
 
-    // Registre o ID do card para o qual a cobrança foi tentada
-    cardsComCobrancaTentada.add(Title);
 
     console.log("[/asaascriacaopagamento] Cobrança criada com sucesso!")
 
-    return res.status(200).send('Processo finalizado com sucesso.');
+    return res.status(200).send('Cobrança realizada.');
   } catch (error) {
     console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
     return res.status(500).send('Erro ao processar a requisição.');

@@ -28,7 +28,7 @@ async function testFunction() {
     const clienteGet = await axios.get(`https://sandbox.asaas.com/api/v3/customers?name=${ContactName}`, {
       headers: {
         'Accept': 'application/json',
-        'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoXzA3ZjgwMTVjLTJiYzgtNDZjYS04YzUxLTQ3NzFhZGU2MTg3Mg=='
+        'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzcwNzk6OiRhYWNoXzMyNjQ1ZTFmLWQ4NGYtNGQ5ZS05ZDliLThmYjRkZDAyZjQyMQ=='
       }
     })
 
@@ -49,7 +49,7 @@ async function testFunction() {
     const criarCobranca = await axios.post('https://sandbox.asaas.com/api/v3/payments', data, {
       headers: {
         'Accept': 'application/json',
-        'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoXzA3ZjgwMTVjLTJiYzgtNDZjYS04YzUxLTQ3NzFhZGU2MTg3Mg=='
+        'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzcwNzk6OiRhYWNoXzMyNjQ1ZTFmLWQ4NGYtNGQ5ZS05ZDliLThmYjRkZDAyZjQyMQ=='
       }
   })
 
