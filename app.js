@@ -106,7 +106,7 @@ app.post('/webhook', async (req, res) => {
             <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
               <p>Olá, <strong>${contactName}</strong></p>
               <p style="font-size: 18px;"><strong>Gostaríamos de informar que o serviço "${dealTitle}" já está em andamento.</strong></p>
-              <p style="font-size: 18px;">Em breve, você receberá atualizações o status do caso.</p>
+              <p style="font-size: 18px;">Em breve, você receberá atualizações sobre o status do caso.</p>
               <p style="font-size: 18px;">Caso tenha alguma dúvida, sinta-se à vontade para entrar em contato.</p>
               <p style="font-size: 16px;">Agradecemos a sua confiança!<br>Equipe Apex Marcas e Patentes</p>
             </div>
