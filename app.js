@@ -469,7 +469,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
 
     // Verificar se o StageId é igual ao estágio específico
     if (StageId !== 50003844) {
-      // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
+      console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
 
@@ -486,6 +486,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     })
 
     if (getCampoPago.data.OtherProperties[0].StringValue === 'True') {
+      console.log('Campo Pago')
       return res.status(200).send('Card já foi pago.');
     }
 
@@ -493,7 +494,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
 
     // Verificar se o evento atual é o mesmo que o último evento processado
     if (lastProcessedEvent === JSON.stringify(req.body)) {
-      // console.log('[/asaascriacaopagamento] Este evento já foi processado.')
+      console.log('[/asaascriacaopagamento] Este evento já foi processado.')
       return res.status(200).send('Este evento já foi processado.');
     }
 
