@@ -106,7 +106,7 @@ app.post('/webhook', async (req, res) => {
             <div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
               <p>Olá, <strong>${contactName}</strong></p>
               <p style="font-size: 18px;"><strong>Gostaríamos de informar que o serviço "${dealTitle}" já está em andamento.</strong></p>
-              <p style="font-size: 18px;">Em breve, você receberá atualizações sobre o status do caso.</p>
+              <p style="font-size: 18px;">Em breve, você receberá atualizações o status do caso.</p>
               <p style="font-size: 18px;">Caso tenha alguma dúvida, sinta-se à vontade para entrar em contato.</p>
               <p style="font-size: 16px;">Agradecemos a sua confiança!<br>Equipe Apex Marcas e Patentes</p>
             </div>
@@ -469,32 +469,18 @@ app.post('/asaascriacaopagamento', async (req, res) => {
 
     // Verificar se o StageId é igual ao estágio específico
     if (StageId !== 50003844) {
-      console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
+      // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
 
-    // if (oldStageId === 50003844) {
-    //   // console.log('[/asaascriacaopagamento] Ignorando edição.')
-    //   return res.status(200).send('Edição já realizada.')
-    // }
-
-    const getCampoPago = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
-      headers: {
-        'Accept': 'application/json',
-        'access_token': process.env.ASAAS_SANDBOX_KEY
-      }
-    })
-
-    if (getCampoPago.data.OtherProperties[0].StringValue === 'True') {
-      console.log('Campo Pago')
-      return res.status(200).send('Card já foi pago.');
+    if (oldStageId === 50003844) {
+      // console.log('[/asaascriacaopagamento] Ignorando edição.')
+      return res.status(200).send('Edição já realizada.')
     }
-
-    
 
     // Verificar se o evento atual é o mesmo que o último evento processado
     if (lastProcessedEvent === JSON.stringify(req.body)) {
-      console.log('[/asaascriacaopagamento] Este evento já foi processado.')
+      // console.log('[/asaascriacaopagamento] Este evento já foi processado.')
       return res.status(200).send('Este evento já foi processado.');
     }
 
