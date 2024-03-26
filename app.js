@@ -346,7 +346,7 @@ app.post('/ploomesnew', async (req, res) => {
   }
 });
 
-app.post('/asaaspagamento', async (req, res) => {
+app.post('/asaaspagamento_2', async (req, res) => {
   try {
     const event = req.body.event;
     const payment = req.body.payment;
@@ -468,19 +468,14 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     const oldStageId = req.body.Old.StageId
 
     // Verificar se o StageId é igual ao estágio específico
-    if (StageId !== 50003844) {
+    if (StageId !== 50003844 || oldStageId === StageId) {
       // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
 
-    if (oldStageId === 50003844) {
-      // console.log('[/asaascriacaopagamento] Ignorando edição.')
-      return res.status(200).send('Edição já realizada.')
-    }
-
     // Verificar se o evento atual é o mesmo que o último evento processado
     if (lastProcessedEvent === JSON.stringify(req.body)) {
-      // console.log('[/asaascriacaopagamento] Este evento já foi processado.')
+      console.log('[/asaascriacaopagamento] Este evento já foi processado.')
       return res.status(200).send('Este evento já foi processado.');
     }
 
@@ -496,11 +491,11 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       return `${year}-${month}-${day}`;
     }
 
-    const response = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
-      headers: {
-        'User-Key': process.env.PLOOMES_USER_KEY
-      }
-    });
+    // const response = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
+    //   headers: {
+    //     'User-Key': process.env.PLOOMES_USER_KEY
+    //   }
+    // });
 
     const clienteGet = await axios.get(`https://sandbox.asaas.com/api/v3/customers?name=${ContactName}`, {
       headers: {
