@@ -446,11 +446,17 @@ let lastProcessedEvent = null; // Variável para armazenar o último evento proc
 app.post('/asaascriacaopagamento', async (req, res) => {
   try {
     const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
+    const oldStageId = req.body.Old.StageId
 
     // Verificar se o StageId é igual ao estágio específico
     if (StageId !== 50003844) {
       console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
+    }
+
+    if (oldStageId === 50003844) {
+      console.log('[/asaascriacaopagamento] Ignorando edição.')
+      return res.status(200).send('Edição já realizada.')
     }
 
     // Verificar se o evento atual é o mesmo que o último evento processado
