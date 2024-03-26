@@ -433,7 +433,7 @@ app.post('/asaaspagamento', async (req, res) => {
           await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, {
             "OtherProperties": [
               {
-                  "FieldKey": "deal_COBRANCA_PROCESSADA",
+                  "FieldKey": "deal_6DE22E98-7388-470D-9759-90941364B71D",
                   "StringValue": "True"
               }
             ]
@@ -456,7 +456,7 @@ app.post('/asaaspagamento', async (req, res) => {
       return res.status(200).send('Processo finalizado com sucesso.');
     } catch (error) {
       console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
-      return res.status(500).send('Erro ao processar a requisição.');
+      return res.status(200).send('Erro ao processar a requisição.');
     }
 });
 
