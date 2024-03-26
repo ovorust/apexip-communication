@@ -354,6 +354,9 @@ app.post('/asaaspagamento', async (req, res) => {
     const PIPELINE_TESTE = 50000676;
     const newStage = 50003845; // ETAPA 3
 
+    const dataAtual = new Date();
+    const dataFormatada = format(dataAtual, 'dd/MM/yyyy');  
+
     const pagoTrue = {
       "OtherProperties": [
         {
@@ -375,6 +378,28 @@ app.post('/asaaspagamento', async (req, res) => {
     const nextStage = {
       "StageId": newStage
     };
+
+    if (event === "PAYMENT_CREATED") {
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+        headers: {
+          'User-Key': process.env.PLOOMES_USER_KEY
+        }
+      });
+
+      if (response.data.value && response.data.value.length > 0) {
+        const dealId = response.data.value[0].Id;
+
+        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, aplicarDataCobranca, {
+          headers: {
+            'User-Key': process.env.PLOOMES_USER_KEY
+          }
+        });
+        console.log('[/asaaspagamento] Pagamento criado e data de cobrança definida.');
+      } else {
+        console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
+        return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
+      }
+    }
 
     if (event === "PAYMENT_RECEIVED") {
       console.log('Pagamento recebido');
@@ -398,9 +423,9 @@ app.post('/asaaspagamento', async (req, res) => {
           headers: {
             'User-Key': process.env.PLOOMES_USER_KEY
           }
-        });        
+        });
+
         console.log('[/asaaspagamento] Card movido para o próximo estágio.');
-        return res.status(200).send('Pagamento recebido!');
       } else {
         console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
         return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
@@ -416,18 +441,26 @@ app.post('/asaaspagamento', async (req, res) => {
     }
 });
 
+let lastProcessedEvent = null; // Variável para armazenar o último evento processado
+
 app.post('/asaascriacaopagamento', async (req, res) => {
   try {
-    const { Title, Id, StageId, ContactName, Amount } = req.body.New;
+    const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
 
-    // Verifique se o StageId é igual ao estágio específico
+    // Verificar se o StageId é igual ao estágio específico
     if (StageId !== 50003844) {
       console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
 
-    const dataAtual = new Date();
-    const dataFormatada = format(dataAtual, 'dd/MM/yyyy'); 
+    // Verificar se o evento atual é o mesmo que o último evento processado
+    if (lastProcessedEvent === JSON.stringify(req.body)) {
+      console.log('[/asaascriacaopagamento] Este evento já foi processado.')
+      return res.status(200).send('Este evento já foi processado.');
+    }
+
+    // Armazenar o evento atual como o último evento processado
+    lastProcessedEvent = JSON.stringify(req.body);
 
     function getCurrentDate(addDays = 0) {
       const today = new Date();
@@ -470,23 +503,6 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       }
     })
 
-    const aplicarDataCobranca = {
-      "OtherProperties": [
-        {
-            "FieldKey": "deal_5F5D9E86-F0DF-4063-AD70-7FF2F9F2F7C9",
-            "StringValue": dataFormatada
-        }
-      ]
-    }
-   
-
-    await axios.patch(`https://api2.ploomes.com/Deals(${Id})`, aplicarDataCobranca, {
-      headers: {
-        'User-Key': process.env.PLOOMES_USER_KEY
-      }
-    });
-
-
     console.log("[/asaascriacaopagamento] Cobrança criada com sucesso!")
 
     return res.status(200).send('Cobrança realizada.');
@@ -495,6 +511,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     return res.status(500).send('Erro ao processar a requisição.');
   }
 });
+
 
 app.post('/stripeinvoice', async (req, res) => {
   try {
