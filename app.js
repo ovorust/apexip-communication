@@ -473,10 +473,23 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       return res.status(200).send('Pipeline não correspondente.')
     }
 
-    if (oldStageId === 50003844) {
-      // console.log('[/asaascriacaopagamento] Ignorando edição.')
-      return res.status(200).send('Edição já realizada.')
+    // if (oldStageId === 50003844) {
+    //   // console.log('[/asaascriacaopagamento] Ignorando edição.')
+    //   return res.status(200).send('Edição já realizada.')
+    // }
+
+    const getCampoPago = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'`, {
+      headers: {
+        'Accept': 'application/json',
+        'access_token': process.env.ASAAS_SANDBOX_KEY
+      }
+    })
+
+    if (getCampoPago.data.OtherProperties[0].StringValue === 'True') {
+      return res.status(200).send('Card já foi pago.');
     }
+
+    
 
     // Verificar se o evento atual é o mesmo que o último evento processado
     if (lastProcessedEvent === JSON.stringify(req.body)) {
