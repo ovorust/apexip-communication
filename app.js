@@ -379,27 +379,27 @@ app.post('/asaaspagamento', async (req, res) => {
       "StageId": newStage
     };
 
-    if (event === "PAYMENT_CREATED") {
-      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
-        headers: {
-          'User-Key': process.env.PLOOMES_USER_KEY
-        }
-      });
+    // if (event === "PAYMENT_CREATED") {
+    //   const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+    //     headers: {
+    //       'User-Key': process.env.PLOOMES_USER_KEY
+    //     }
+    //   });
 
-      if (response.data.value && response.data.value.length > 0) {
-        const dealId = response.data.value[0].Id;
+    //   if (response.data.value && response.data.value.length > 0) {
+    //     const dealId = response.data.value[0].Id;
 
-        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, aplicarDataCobranca, {
-          headers: {
-            'User-Key': process.env.PLOOMES_USER_KEY
-          }
-        });
-        console.log('[/asaaspagamento] Pagamento criado e data de cobrança definida.');
-      } else {
-        console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
-        return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
-      }
-    }
+    //     await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, aplicarDataCobranca, {
+    //       headers: {
+    //         'User-Key': process.env.PLOOMES_USER_KEY
+    //       }
+    //     });
+    //     console.log('[/asaaspagamento] Pagamento criado e data de cobrança definida.');
+    //   } else {
+    //     console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
+    //     return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
+    //   }
+    // }
 
     if (event === "PAYMENT_RECEIVED") {
       // console.log('Pagamento recebido');
