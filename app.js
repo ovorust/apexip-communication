@@ -402,30 +402,49 @@ app.post('/asaaspagamento', async (req, res) => {
     }
 
     if (event === "PAYMENT_RECEIVED") {
-      console.log('Pagamento recebido');
-
+      // console.log('Pagamento recebido');
+    
       const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
       });
-
+    
       if (response.data.value && response.data.value.length > 0) {
         const dealId = response.data.value[0].Id;
-
-        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, pagoTrue, {
-          headers: {
-            'User-Key': process.env.PLOOMES_USER_KEY
-          }
-        });
-
-        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, nextStage, {
-          headers: {
-            'User-Key': process.env.PLOOMES_USER_KEY
-          }
-        });
-
-        console.log('[/asaaspagamento] Card movido para o próximo estágio.');
+    
+        // Verifique se o campo "Cobrança Processada" está marcado como verdadeiro
+        if (!response.data.value[0].OtherProperties.some(property => property.FieldKey === "deal_COBRANCA_PROCESSADA" && property.StringValue === "True")) {
+          await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, pagoTrue, {
+            headers: {
+              'User-Key': process.env.PLOOMES_USER_KEY
+            }
+          });
+    
+          await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, nextStage, {
+            headers: {
+              'User-Key': process.env.PLOOMES_USER_KEY
+            }
+          });
+    
+          console.log('[/asaaspagamento] Card movido para o próximo estágio.');
+    
+          // Marque o campo "Cobrança Processada" como verdadeiro
+          await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, {
+            "OtherProperties": [
+              {
+                  "FieldKey": "deal_COBRANCA_PROCESSADA",
+                  "StringValue": "True"
+              }
+            ]
+          }, {
+            headers: {
+              'User-Key': process.env.PLOOMES_USER_KEY
+            }
+          });
+        } else {
+          console.log('[/asaaspagamento] Cobrança já processada anteriormente.');
+        }
       } else {
         console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
         return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
@@ -450,18 +469,18 @@ app.post('/asaascriacaopagamento', async (req, res) => {
 
     // Verificar se o StageId é igual ao estágio específico
     if (StageId !== 50003844) {
-      console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
+      // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
 
     if (oldStageId === 50003844) {
-      console.log('[/asaascriacaopagamento] Ignorando edição.')
+      // console.log('[/asaascriacaopagamento] Ignorando edição.')
       return res.status(200).send('Edição já realizada.')
     }
 
     // Verificar se o evento atual é o mesmo que o último evento processado
     if (lastProcessedEvent === JSON.stringify(req.body)) {
-      console.log('[/asaascriacaopagamento] Este evento já foi processado.')
+      // console.log('[/asaascriacaopagamento] Este evento já foi processado.')
       return res.status(200).send('Este evento já foi processado.');
     }
 
