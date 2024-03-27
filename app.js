@@ -605,19 +605,7 @@ app.post('/newclient', async (req, res) => {
 
 app.post('/updateclient', async (req, res) => {
   try {
-    const { Name, CNPJ, CPF } = req.body.New;
-
-    const asaasCustomers = await axios.get('https://sandbox.asaas.com/api/v3/customers', {
-      headers: {
-        accept: 'application/json',
-        access_token: process.env.ASAAS_SANDBOX_KEY
-      }
-    });
-
-    const existingCustomer = asaasCustomers.data.filter(customer => customer.name === Name);
-
-    if (existingCustomer.length > 0) {
-      const customerIdAsaas = existingCustomer[0].id;
+    const { Name, CNPJ, CPF, Email } = req.body.New;
 
       // Atualizar cliente na Asaas
       const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
@@ -630,7 +618,7 @@ app.post('/updateclient', async (req, res) => {
         },
         data: {
           name: Name,
-          email: req.body.Email || existingCustomer[0].email, // Use o email do cliente já existente se nenhum email for enviado no corpo da requisição
+          email: Email,
           cpfCnpj: CNPJ || CPF
         }
       };
@@ -638,16 +626,10 @@ app.post('/updateclient', async (req, res) => {
       axios(url, options)
       .then(response => console.log('[/updateclient] Cliente atualizado com sucesso na Asaas'))
       .catch(error => console.error('error:', error));
-
-    } else {
-      console.log('[/updateclient] Cliente não encontrado na Asaas');
-    }
-
-
-      
+ 
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
-    console.error('[/updateclient] Erro ao processar requisição /newclient:', error.message);
+    console.error('[/updateclient] Erro ao processar requisição /updateclient:', error.message);
     return res.status(200).send('Erro ao processar a requisição.');
   }
 });
