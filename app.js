@@ -616,8 +616,8 @@ app.post('/updateclient', async (req, res) => {
 
     const existingCustomer = asaasCustomers.data.data.find(customer => customer.name === Name);
 
-    if (existingCustomer.length > 0) {
-      const customerIdAsaas = existingCustomer[0].id;
+    if (existingCustomer) {
+      const customerIdAsaas = existingCustomer.id;
 
       // Atualizar cliente na Asaas
       const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
