@@ -607,38 +607,6 @@ app.post('/updateclient', async (req, res) => {
   try {
     const { Name, CNPJ, CPF } = req.body.New;
 
-    // Buscar cliente na Stripe pelo nome
-    const stripeCustomers = await stripe.customers.list({ limit: 1, name: Name });
-    
-    // Verificar se o cliente foi encontrado na Stripe
-    if (stripeCustomers.data.length === 0) {
-      return res.status(404).send('Cliente não encontrado na Stripe.');
-    }
-
-    // Pegar o ID do cliente encontrado
-    const customerId = stripeCustomers.data[0].id;
-
-    // Buscar email no Ploomes
-    const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
-      headers: {
-        'User-Key': process.env.PLOOMES_USER_KEY
-      }
-    });
-
-    // Verificar se o email foi encontrado no Ploomes
-    const emailContacts = getContacts.data.value[0].Email;
-    if (!emailContacts) {
-      return res.status(404).send('Email do cliente não encontrado no Ploomes.');
-    }
-
-    // Atualizar cliente na Stripe
-    const updatedCustomer = await stripe.customers.update(customerId, {
-      email: emailContacts,
-    });
-
-    console.log('[/updateclient] Cliente atualizado com sucesso na Stripe');
-
-
     const asaasCustomers = await axios.get('https://sandbox.asaas.com/api/v3/customers', {
       headers: {
         accept: 'application/json',
