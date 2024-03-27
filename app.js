@@ -520,7 +520,7 @@ app.post('/stripeinvoice', async (req, res) => {
     const { ContactName, Amount, PipelineId, Title, StageId } = req.body.New;
 
     // PIPELINE FUNIL SERVIÇOS (EXTERIOR): 10015008      ETAPA FINANCEIRA: 10078298
-    if (PipelineId !== 50000676 || StageId !== 50003845) {
+    if (StageId !== 50003845) {
       console.log('[/stripeinvoice] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
@@ -658,7 +658,7 @@ app.post('/updateclient', async (req, res) => {
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          access_token: process.env.ASAAS_ACCESS_KEY
+          access_token: process.env.ASAAS_SANDBOX_KEY
         },
         data: {
           name: Name,
