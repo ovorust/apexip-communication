@@ -352,8 +352,8 @@ app.post('/asaaspagamento', async (req, res) => {
     const event = req.body.event;
     const payment = req.body.payment;
 
-    const PIPELINE_TESTE = 50000676;
-    const newStage = 50003845; // ETAPA 3
+    const PIPELINE_TESTE = 10015005;
+    const newStage = 10075648; // ETAPA 3
 
     const dataAtual = new Date();
     const dataFormatada = format(dataAtual, 'dd/MM/yyyy');  
@@ -420,13 +420,13 @@ app.post('/asaaspagamento', async (req, res) => {
           }
         });
 
-        await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, nextStage, {
-          headers: {
-            'User-Key': process.env.PLOOMES_USER_KEY
-          }
-        });
+        // await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, nextStage, {
+        //   headers: {
+        //     'User-Key': process.env.PLOOMES_USER_KEY
+        //   }
+        // });
 
-        console.log('[/asaaspagamento] Card movido para o próximo estágio.');
+        console.log('[/asaaspagamento] Pagamento realizado com sucesso!');
       } else {
         console.log('[/asaaspagamento] Nenhum negócio encontrado com a descrição fornecida.');
         return res.status(200).send('Nenhum negócio encontrado com a descrição fornecida.');
@@ -449,8 +449,8 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
     const oldStageId = req.body.Old.StageId
 
-    // Verificar se o StageId é igual ao estágio específico
-    if (StageId !== 50003844 || oldStageId === StageId) {
+    // Verificar se o StageId é igual ao estágio específico    STAGE: FECHAMENTO DE NEGOCIO = 10075648
+    if (StageId !== 10075648 || oldStageId === StageId) {
       // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
