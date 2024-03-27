@@ -610,7 +610,7 @@ app.post('/updateclient', async (req, res) => {
     const asaasCustomers = await axios.get('https://sandbox.asaas.com/api/v3/customers', {
       headers: {
         accept: 'application/json',
-        access_token: process.env.ASAAS_ACCESS_KEY
+        access_token: process.env.ASAAS_SANDBOX_KEY
       }
     });
 
@@ -636,7 +636,7 @@ app.post('/updateclient', async (req, res) => {
       };
 
       axios(url, options)
-      .then(response => console.log('[/newclient] Cliente cadastrado com sucesso na Asaas'))
+      .then(response => console.log('[/updateclient] Cliente atualizado com sucesso na Asaas'))
       .catch(error => console.error('error:', error));
 
     } else {
@@ -647,7 +647,7 @@ app.post('/updateclient', async (req, res) => {
       
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
-    console.error('[/newclient] Erro ao processar requisição /newclient:', error.message);
+    console.error('[/updateclient] Erro ao processar requisição /newclient:', error.message);
     return res.status(200).send('Erro ao processar a requisição.');
   }
 });
