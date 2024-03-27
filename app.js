@@ -630,7 +630,7 @@ app.post('/updateclient', async (req, res) => {
         },
         data: {
           name: Name,
-          email: req.body.Email || existingCustomer[0].email, // Use o email do cliente já existente se nenhum email for enviado no corpo da requisição
+          email: req.body.Email || existingCustomer.email, // Use o email do cliente já existente se nenhum email for enviado no corpo da requisição
           cpfCnpj: CNPJ || CPF
         }
       };
