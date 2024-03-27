@@ -606,7 +606,7 @@ app.post('/newclient', async (req, res) => {
 
 app.post('/updateclient', async (req, res) => {
   try {
-    const { Name, CNPJ, CPF } = req.body.New;
+    const { Name, CNPJ, CPF, Email } = req.body.New;
 
     const asaasCustomers = await axios.get('https://sandbox.asaas.com/api/v3/customers', {
       headers: {
@@ -628,7 +628,8 @@ app.post('/updateclient', async (req, res) => {
           accept: 'application/json',
           'content-type': 'application/json',
           access_token: process.env.ASAAS_SANDBOX_KEY
-        }
+        },
+        body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email})
       };
       
       fetch(url, options)
