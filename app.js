@@ -509,7 +509,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     return res.status(200).send('Cobrança realizada.');
   } catch (error) {
     console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
-    return res.status(500).send('Erro ao processar a requisição.');
+    return res.status(200).send('Erro ao processar a requisição.');
   }
 });
 
@@ -554,7 +554,7 @@ app.post('/stripeinvoice', async (req, res) => {
     return res.status(200).send('Processo finalizado com sucesso.');
   } catch (error) {
     console.error('[/stripeinvoice] Erro ao processar requisição /stripeinvoice:', error.message);
-    return res.status(500).send('Erro ao processar a requisição.');
+    return res.status(200).send('Erro ao processar a requisição.');
   }
 });
 
@@ -600,6 +600,87 @@ app.post('/newclient', async (req, res) => {
   } catch (error) {
     console.error('[/newclient] Erro ao processar requisição /newclient:', error.message);
     return res.status(500).send('Erro ao processar a requisição.');
+  }
+});
+
+app.post('/updateclient', async (req, res) => {
+  try {
+    const { Name, CNPJ, CPF } = req.body.New;
+
+    // Buscar cliente na Stripe pelo nome
+    const stripeCustomers = await stripe.customers.list({ limit: 1, name: Name });
+    
+    // Verificar se o cliente foi encontrado na Stripe
+    if (stripeCustomers.data.length === 0) {
+      return res.status(404).send('Cliente não encontrado na Stripe.');
+    }
+
+    // Pegar o ID do cliente encontrado
+    const customerId = stripeCustomers.data[0].id;
+
+    // Buscar email no Ploomes
+    const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
+      headers: {
+        'User-Key': process.env.PLOOMES_USER_KEY
+      }
+    });
+
+    // Verificar se o email foi encontrado no Ploomes
+    const emailContacts = getContacts.data.value[0].Email;
+    if (!emailContacts) {
+      return res.status(404).send('Email do cliente não encontrado no Ploomes.');
+    }
+
+    // Atualizar cliente na Stripe
+    const updatedCustomer = await stripe.customers.update(customerId, {
+      email: emailContacts,
+    });
+
+    console.log('[/updateclient] Cliente atualizado com sucesso na Stripe');
+
+
+    const asaasCustomers = await axios.get('https://sandbox.asaas.com/api/v3/customers', {
+      headers: {
+        accept: 'application/json',
+        access_token: process.env.ASAAS_ACCESS_KEY
+      }
+    });
+
+    const existingCustomer = asaasCustomers.data.filter(customer => customer.name === Name);
+
+    if (existingCustomer.length > 0) {
+      const customerIdAsaas = existingCustomer[0].id;
+
+      // Atualizar cliente na Asaas
+      const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
+      const options = {
+        method: 'PATCH',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          access_token: process.env.ASAAS_ACCESS_KEY
+        },
+        data: {
+          name: Name,
+          email: req.body.Email || existingCustomer[0].email, // Use o email do cliente já existente se nenhum email for enviado no corpo da requisição
+          cpfCnpj: CNPJ || CPF
+        }
+      };
+
+      axios(url, options)
+      .then(response => console.log('[/newclient] Cliente cadastrado com sucesso na Asaas'))
+      .catch(error => console.error('error:', error));
+
+    } else {
+      console.log('[/updateclient] Cliente não encontrado na Asaas');
+    }
+
+
+      
+    return res.status(200).send('Processo finalizado com sucesso.');
+  } catch (error) {
+    console.error('[/newclient] Erro ao processar requisição /newclient:', error.message);
+    return res.status(200).send('Erro ao processar a requisição.');
   }
 });
 
