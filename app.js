@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { format } = require('date-fns');
+const fetch = require('node-fetch');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -618,28 +619,21 @@ app.post('/updateclient', async (req, res) => {
 
     if (existingCustomer) {
       const customerIdAsaas = existingCustomer.id;
-      console.log(existingCustomer)
-      console.log(existingCustomer.id)
 
-      // // Atualizar cliente na Asaas
-      // const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
-      // const options = {
-      //   method: 'PATCH',
-      //   headers: {
-      //     accept: 'application/json',
-      //     'content-type': 'application/json',
-      //     access_token: process.env.ASAAS_SANDBOX_KEY
-      //   },
-      //   data: {
-      //     name: Name,
-      //     email: req.body.Email || existingCustomer.email, // Use o email do cliente já existente se nenhum email for enviado no corpo da requisição
-      //     cpfCnpj: CNPJ || CPF
-      //   }
-      // };
-
-      // axios(url, options)
-      // .then(response => console.log('[/updateclient] Cliente atualizado com sucesso na Asaas'))
-      // .catch(error => console.error('error:', error));
+      // Atualizar cliente na Asaas
+      const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
+      const options = {
+        method: 'PUT',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          access_token: process.env.ASAAS_SANDBOX_KEY
+        }
+      };
+      
+      fetch(url, options)
+        .then(res => console.log('[/updateclient] Cliente atualizado na Asaas com sucesso!'))
+        .catch(err => console.error('[/updateclient] Erro ao atualizar cliente Asaas: ' + err));
 
     } else {
       console.log('[/updateclient] Cliente não encontrado na Asaas');
