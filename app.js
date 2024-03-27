@@ -618,26 +618,28 @@ app.post('/updateclient', async (req, res) => {
 
     if (existingCustomer) {
       const customerIdAsaas = existingCustomer.id;
+      console.log(existingCustomer)
+      console.log(existingCustomer.id)
 
-      // Atualizar cliente na Asaas
-      const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
-      const options = {
-        method: 'PATCH',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          access_token: process.env.ASAAS_SANDBOX_KEY
-        },
-        data: {
-          name: Name,
-          email: req.body.Email || existingCustomer.email, // Use o email do cliente já existente se nenhum email for enviado no corpo da requisição
-          cpfCnpj: CNPJ || CPF
-        }
-      };
+      // // Atualizar cliente na Asaas
+      // const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
+      // const options = {
+      //   method: 'PATCH',
+      //   headers: {
+      //     accept: 'application/json',
+      //     'content-type': 'application/json',
+      //     access_token: process.env.ASAAS_SANDBOX_KEY
+      //   },
+      //   data: {
+      //     name: Name,
+      //     email: req.body.Email || existingCustomer.email, // Use o email do cliente já existente se nenhum email for enviado no corpo da requisição
+      //     cpfCnpj: CNPJ || CPF
+      //   }
+      // };
 
-      axios(url, options)
-      .then(response => console.log('[/updateclient] Cliente atualizado com sucesso na Asaas'))
-      .catch(error => console.error('error:', error));
+      // axios(url, options)
+      // .then(response => console.log('[/updateclient] Cliente atualizado com sucesso na Asaas'))
+      // .catch(error => console.error('error:', error));
 
     } else {
       console.log('[/updateclient] Cliente não encontrado na Asaas');
