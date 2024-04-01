@@ -402,7 +402,7 @@ app.post('/asaaspagamento', async (req, res) => {
       }
     }
 
-    if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
+    if (event === "PAYMENT_RECEIVED") {
       console.log('Pagamento recebido');
 
       const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
