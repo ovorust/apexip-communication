@@ -452,7 +452,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     
     let parcelas;
     // Verificar se o StageId é igual ao estágio específico    STAGE: FECHAMENTO DE NEGOCIO = 10075648
-    if (StageId !== 10075648 || oldStageId === StageId) {
+    if (StageId !== 50003844 || oldStageId === StageId) {
       // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
