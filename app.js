@@ -353,7 +353,7 @@ app.post('/asaaspagamento', async (req, res) => {
     const payment = req.body.payment;
 
     const PIPELINE_TESTE = 10015005;
-    const newStage = 10075648; // ETAPA 3
+    const newStage = 50003845; // ETAPA 3 50003845    FECHAMENTO DE NEGÓCIO 10075648
 
     const dataAtual = new Date();
     const dataFormatada = format(dataAtual, 'dd/MM/yyyy');  
@@ -402,7 +402,7 @@ app.post('/asaaspagamento', async (req, res) => {
       }
     }
 
-    if (event === "PAYMENT_RECEIVED") {
+    if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
       console.log('Pagamento recebido');
 
       const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
@@ -448,7 +448,9 @@ app.post('/asaascriacaopagamento', async (req, res) => {
   try {
     const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
     const oldStageId = req.body.Old.StageId
-
+    let formaDePagamento;
+    
+    let parcelas;
     // Verificar se o StageId é igual ao estágio específico    STAGE: FECHAMENTO DE NEGOCIO = 10075648
     if (StageId !== 10075648 || oldStageId === StageId) {
       // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
@@ -486,13 +488,48 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       }
     })
 
+    const dealGet = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'&$select=OtherProperties`, {
+          headers: {
+              'Accept': 'application/json',
+              'User-Key': process.env.PLOOMES_USER_KEY
+          }
+      });
+
+      // Verifique se há dados na resposta
+      if (dealGet.data && dealGet.data.value && dealGet.data.value.length > 0) {
+        const deals = dealGet.data.value;
+        parcelas = deals[0]['OtherProperties'][0].ObjectValueName
+        formaDePagamento = deals[0]['OtherProperties'][1].ObjectValueName.toUpperCase()
+
+        if (formaDePagamento === 'CARTÃO DE CRÉDITO') {
+          formaDePagamento = 'CREDIT_CARD'
+        } else if (formaDePagamento === undefined) {
+          formaDePagamento = 'UNDEFINED'
+        }
+
+        
+        if (parcelas === 'À vista (1x)' || parcelas === undefined) {
+
+          parcelas = 0 // Deve ser 0 porque na Asaas 0 parcelas significa "À Vista"
+        } else {
+          parcelas = parseInt(parcelas)
+        }
+
+        console.log(formaDePagamento)
+    } else {
+        console.log("[/asaascriacaopagamento] Nenhum dado de pagamento encontrado.");
+        return res.status(200).send('Cobrança realizada.');
+    }
+
     const idCliente = clienteGet.data.data[0].id
 
-    const data = {
-      billingType: 'UNDEFINED',
+   const data = {
+      billingType: formaDePagamento,
       customer: idCliente,
       value: Amount,
       description: Title,
+      installmentCount: parcelas,
+      totalValue: Amount,
       dueDate: getCurrentDate(7)
     };
 
