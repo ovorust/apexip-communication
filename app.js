@@ -382,11 +382,15 @@ app.post('/asaaspagamento', async (req, res) => {
 
     if (event === "PAYMENT_CREATED") {
       console.log('payment_created entrou')
+      console.log(payment.description)
+      console.log(PIPELINE_TESTE)
       const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
       });
+
+      console.log(response.data)
 
       if (response.data.value && response.data.value.length > 0) {
         const dealId = response.data.value[0].Id;
@@ -550,7 +554,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
 
     return res.status(200).send('Cobrança realizada.');
   } catch (error) {
-    console.error('[/asaaspagamento] Erro ao processar requisição /asaaspagamento:', error.message);
+    console.error('[/asaascriacaopagamento] Erro ao processar requisição /asaascriacaopagamento:', error.message);
     return res.status(200).send('Erro ao processar a requisição.');
   }
 });
