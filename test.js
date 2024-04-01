@@ -3,24 +3,21 @@ const axios = require('axios');
 
 async function createInvoice() {
 
-  const url = 'https://sandbox.asaas.com/api/v3/customers';
-    const options = {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoXzA3ZjgwMTVjLTJiYzgtNDZjYS04YzUxLTQ3NzFhZGU2MTg3Mg=='
-      },
-      data: {
-        name: 'John Doe',
-        email: 'john.doe@asaas.com.br',
-        cpfCnpj: '24971563792'
-      }
-    };
+  let descricao = "Teste 2026";
 
-    axios(url, options)
-      .then(response => console.log(response.data))
-      .catch(error => console.error('error:', error));
+  // Verifica se a descrição possui "Parcela" no nome
+  if (descricao.includes("Parcela")) {
+    // Extrai o texto após a pontuação usando uma expressão regular
+    const match = descricao.match(/\. (.+)/);
+    
+    // Se houver uma correspondência na expressão regular
+    if (match) {
+      // Captura o texto após a pontuação
+      descricao = match[1];
+    }
+  }
+  
+  console.log(descricao); // Saída: "Teste 2026"
 }
 
 createInvoice();

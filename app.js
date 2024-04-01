@@ -20,6 +20,20 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+function ajustaDescricaoPagamento(descricao) {
+  if (descricao.includes("Parcela")) {
+    // Extrai o texto após a pontuação usando uma expressão regular
+    const match = descricao.match(/\. (.+)/);
+    
+    // Se houver uma correspondência na expressão regular
+    if (match) {
+      // Captura o texto após a pontuação
+      descricao = match[1];
+    }
+  }
+  return descricao
+}
+
 // Middleware
 app.use(bodyParser.json());
 
@@ -384,7 +398,9 @@ app.post('/asaaspagamento', async (req, res) => {
       console.log('payment_created entrou')
       console.log(payment.description)
       console.log(PIPELINE_TESTE)
-      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+
+      const nomeCardCobranca = ajustaDescricaoPagamento(payment.description)
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${nomeCardCobranca}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
@@ -410,8 +426,9 @@ app.post('/asaaspagamento', async (req, res) => {
 
     if (event === "PAYMENT_RECEIVED") {
       console.log('Pagamento recebido');
+      const nomeCardCobranca = ajustaDescricaoPagamento(payment.description)
 
-      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${nomeCardCobranca}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
