@@ -352,7 +352,7 @@ app.post('/asaaspagamento', async (req, res) => {
     const event = req.body.event;
     const payment = req.body.payment;
 
-    const PIPELINE_TESTE = 10015005;
+    const PIPELINE_TESTE = 50000676;
     const newStage = 50003845; // ETAPA 3 50003845    FECHAMENTO DE NEGÓCIO 10075648
 
     const dataAtual = new Date();
