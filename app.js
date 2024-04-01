@@ -381,6 +381,7 @@ app.post('/asaaspagamento', async (req, res) => {
     };
 
     if (event === "PAYMENT_CREATED") {
+      console.log('payment_created entrou')
       const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${payment.description}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
@@ -389,6 +390,7 @@ app.post('/asaaspagamento', async (req, res) => {
 
       if (response.data.value && response.data.value.length > 0) {
         const dealId = response.data.value[0].Id;
+        console.log('deal id (pc): ', dealId)
 
         await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, aplicarDataCobranca, {
           headers: {
@@ -413,6 +415,8 @@ app.post('/asaaspagamento', async (req, res) => {
 
       if (response.data.value && response.data.value.length > 0) {
         const dealId = response.data.value[0].Id;
+
+        console.log('deal id (pr): ', dealId)
 
         await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, pagoTrue, {
           headers: {
