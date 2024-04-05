@@ -366,8 +366,9 @@ app.post('/asaaspagamento', async (req, res) => {
     const event = req.body.event;
     const payment = req.body.payment;
 
+    const PIPELINE_COMERCIAL_NACIONAL = 10015005;
     const PIPELINE_TESTE = 50000676;
-    const newStage = 50003845; // ETAPA 3 50003845    FECHAMENTO DE NEGÓCIO 10075648
+    const newStage = 10075648; // ETAPA 3 50003845    FECHAMENTO DO NEGÓCIO 10075648
 
     const dataAtual = new Date();
     const dataFormatada = format(dataAtual, 'dd/MM/yyyy');  
@@ -395,12 +396,8 @@ app.post('/asaaspagamento', async (req, res) => {
     };
 
     if (event === "PAYMENT_CREATED") {
-      console.log('payment_created entrou')
-      console.log(payment.description)
-      console.log(PIPELINE_TESTE)
-
       const nomeCardCobranca = ajustaDescricaoPagamento(payment.description)
-      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${nomeCardCobranca}'`, {
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_COMERCIAL_NACIONAL} and Title eq '${nomeCardCobranca}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
@@ -410,7 +407,6 @@ app.post('/asaaspagamento', async (req, res) => {
 
       if (response.data.value && response.data.value.length > 0) {
         const dealId = response.data.value[0].Id;
-        console.log('deal id (pc): ', dealId)
 
         await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, aplicarDataCobranca, {
           headers: {
@@ -425,10 +421,10 @@ app.post('/asaaspagamento', async (req, res) => {
     }
 
     if (event === "PAYMENT_RECEIVED") {
-      console.log('Pagamento recebido');
+      console.log('[/asaaspagamento] Pagamento recebido');
       const nomeCardCobranca = ajustaDescricaoPagamento(payment.description)
 
-      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_TESTE} and Title eq '${nomeCardCobranca}'`, {
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_COMERCIAL_NACIONAL} and Title eq '${nomeCardCobranca}'`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
@@ -436,8 +432,6 @@ app.post('/asaaspagamento', async (req, res) => {
 
       if (response.data.value && response.data.value.length > 0) {
         const dealId = response.data.value[0].Id;
-
-        console.log('deal id (pr): ', dealId)
 
         await axios.patch(`https://api2.ploomes.com/Deals(${dealId})`, pagoTrue, {
           headers: {
@@ -474,10 +468,11 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
     const oldStageId = req.body.Old.StageId
     let formaDePagamento;
+    const STAGE_FECHAMENTO_DO_NEGOCIO = 10075648;
     
     let parcelas;
-    // Verificar se o StageId é igual ao estágio específico    STAGE: FECHAMENTO DE NEGOCIO = 10075648
-    if (StageId !== 50003844 || oldStageId === StageId) {
+    // Verificar se o StageId é igual ao estágio específico    STAGE: FECHAMENTO DO NEGOCIO = 10075648
+    if (StageId !== STAGE_FECHAMENTO_DO_NEGOCIO || oldStageId === StageId) {
       // console.log('[/asaascriacaopagamento] Pipeline não correspondente.')
       return res.status(200).send('Pipeline não correspondente.')
     }
@@ -506,10 +501,10 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     //   }
     // });
 
-    const clienteGet = await axios.get(`https://sandbox.asaas.com/api/v3/customers?name=${ContactName}`, {
+    const clienteGet = await axios.get(`https://api.asaas.com/v3/customers?name=${ContactName}`, {
       headers: {
         'Accept': 'application/json',
-        'access_token': process.env.ASAAS_SANDBOX_KEY
+        'access_token': process.env.ASAAS_ACCESS_KEY
       }
     })
 
@@ -560,10 +555,10 @@ app.post('/asaascriacaopagamento', async (req, res) => {
 
     console.log(data)
 
-    const criarCobranca = await axios.post('https://sandbox.asaas.com/api/v3/payments', data, {
+    const criarCobranca = await axios.post('https://api.asaas.com/v3/payments', data, {
       headers: {
         'Accept': 'application/json',
-        'access_token': process.env.ASAAS_SANDBOX_KEY
+        'access_token': process.env.ASAAS_ACCESS_KEY
       }
     })
 
@@ -581,6 +576,8 @@ app.post('/stripeinvoice', async (req, res) => {
   try {
 
     const { ContactName, Amount, PipelineId, Title, StageId } = req.body.New;
+
+    const ETAPA_FINANCEIRA = 10078298;
 
     // PIPELINE FUNIL SERVIÇOS (EXTERIOR): 10015008      ETAPA FINANCEIRA: 10078298
     if (StageId !== 50003845) {
@@ -670,10 +667,10 @@ app.post('/updateclient', async (req, res) => {
   try {
     const { Name, CNPJ, CPF, Email } = req.body.New;
 
-    const asaasCustomers = await axios.get('https://sandbox.asaas.com/api/v3/customers', {
+    const asaasCustomers = await axios.get(`https://api.asaas.com/v3/customers?name=${Name}`, {
       headers: {
         accept: 'application/json',
-        access_token: process.env.ASAAS_SANDBOX_KEY
+        access_token: process.env.ASAAS_ACCESS_KEY
       }
     });
 
@@ -683,13 +680,13 @@ app.post('/updateclient', async (req, res) => {
       const customerIdAsaas = existingCustomer.id;
 
       // Atualizar cliente na Asaas
-      const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
+      const url = `https://api.asaas.com/v3/customers/${customerIdAsaas}`;
       const options = {
         method: 'PUT',
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          access_token: process.env.ASAAS_SANDBOX_KEY
+          access_token: process.env.ASAAS_ACCESS_KEY
         },
         body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email})
       };
