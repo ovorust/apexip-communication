@@ -622,6 +622,20 @@ app.post('/newclient', async (req, res) => {
   try {
     const { Name, CNPJ, CPF } = req.body.New;
 
+    let userPhoneNumber = '';
+
+    const userPhones = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name eq '${Name}'&$expand=Phones&$orderby=TypeId desc&$select=Phones`, {
+      headers: {
+        'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+      }
+    });
+  
+    if (userPhones.data.value.length > 0 && userPhones.data.value[0].Phones && userPhones.data.value[0].Phones.length > 0) {
+      userPhoneNumber = userPhones.data.value[0].Phones[0].SearchPhoneNumber.toString();
+    } else {
+      console.log('A lista de Phones está vazia ou o caminho está incorreto.');
+    }
+
     const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
       headers: {
         'User-Key': process.env.PLOOMES_USER_KEY
@@ -637,6 +651,8 @@ app.post('/newclient', async (req, res) => {
     console.log('[/newclient] Cliente cadastrado com sucesso na Stripe')
 
     // ENDPOINT DO SANDBOX: https://sandbox.asaas.com/api/v3/customers
+
+
     const url = 'https://api.asaas.com/v3/customers';
     const options = {
       method: 'POST',
@@ -645,11 +661,7 @@ app.post('/newclient', async (req, res) => {
         'content-type': 'application/json',
         access_token: process.env.ASAAS_ACCESS_KEY
       },
-      data: {
-        name: Name,
-        email: emailContacts,
-        cpfCnpj: CNPJ || CPF
-      }
+      body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email, phone: userPhoneNumber})
     };
 
     axios(url, options)
@@ -666,6 +678,20 @@ app.post('/newclient', async (req, res) => {
 app.post('/updateclient', async (req, res) => {
   try {
     const { Name, CNPJ, CPF, Email } = req.body.New;
+
+    let userPhoneNumber = '';
+
+    const userPhones = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name eq '${Name}'&$expand=Phones&$orderby=TypeId desc&$select=Phones`, {
+      headers: {
+        'User-Key': process.env.PLOOMES_USER_KEY
+      }
+    });
+  
+    if (userPhones.data.value.length > 0 && userPhones.data.value[0].Phones && userPhones.data.value[0].Phones.length > 0) {
+      userPhoneNumber = userPhones.data.value[0].Phones[0].SearchPhoneNumber.toString();
+    } else {
+      console.log('A lista de Phones está vazia ou o caminho está incorreto.');
+    }
 
     const asaasCustomers = await axios.get(`https://api.asaas.com/v3/customers?name=${Name}`, {
       headers: {
@@ -688,7 +714,7 @@ app.post('/updateclient', async (req, res) => {
           'content-type': 'application/json',
           access_token: process.env.ASAAS_ACCESS_KEY
         },
-        body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email})
+        body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email, phone: userPhoneNumber})
       };
       
       fetch(url, options)

@@ -3,24 +3,55 @@ const axios = require('axios');
 
 async function createInvoice() {
 
-  const Title = 'Processo de Registro de uma Marca - Engetins'
+  const Name = 'Empresa Teste'
+  const CNPJ = '53.659.052/0001-30'
+  const Email = 'afonso@apexip.com'
 
-  const dealGet = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'&$select=OtherProperties`, {
-          headers: {
-              'Accept': 'application/json',
-              'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
-          }
-      });
+  const userPhones = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name eq '${Name}'&$expand=Phones&$orderby=TypeId desc&$select=Phones`, {
+    headers: {
+      'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+    }
+  });
 
-      // Verifique se há dados na resposta
-      if (dealGet.data && dealGet.data.value && dealGet.data.value.length > 0) {
-        const deals = dealGet.data.value;
-        parcelas = deals[0]['OtherProperties'].find(deal => deal.FieldKey === 'deal_0CDE1351-1AE7-4EC6-BEC6-51B6D6103356').ObjectValueName;
-        formaDePagamento = deals[0]['OtherProperties'].find(deal => deal.FieldKey === 'deal_A856FC68-9D24-4D0F-99E4-E7553A97D4CF').ObjectValueName.toUpperCase();
+  const userNumber = userPhones.data.value[0].Phones[0].SearchPhoneNumber.toString();
+
+  const asaasCustomers = await axios.get(`https://api.asaas.com/v3/customers?name=${Name}`, {
+      headers: {
+        accept: 'application/json',
+        access_token: process.env.ASAAS_ACCESS_KEY
       }
+    });
 
-      console.log(parcelas)
-      console.log(formaDePagamento)
+    const existingCustomer = asaasCustomers.data.data.find(customer => customer.name === Name);
+
+    if (existingCustomer) {
+      const customerIdAsaas = existingCustomer.id;
+
+      // Atualizar cliente na Asaas
+      const url = `https://api.asaas.com/v3/customers/${customerIdAsaas}`;
+      const options = {
+        method: 'PUT',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
+        },
+        body: JSON.stringify({
+          name: Name,
+          email: Email,
+          phone: userNumber,
+          cpfCnpj: CNPJ || CPF,
+        })
+      };
+      
+      fetch(url, options)
+        .then(res => res.json())
+        .then(json => console.log(json))
+        .catch(err => console.error('error:' + err));
+
+    } else {
+      console.log('[/updateclient] Cliente não encontrado na Asaas');
+    }
   
 }
 
