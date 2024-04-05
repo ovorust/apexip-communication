@@ -377,7 +377,7 @@ app.post('/asaaspagamento', async (req, res) => {
       "OtherProperties": [
         {
             "FieldKey": "deal_6DE22E98-7388-470D-9759-90941364B71D",
-            "StringValue": "True"
+            "StringValue": "Aprovado"
         }
       ]
     };
