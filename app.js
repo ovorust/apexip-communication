@@ -663,7 +663,7 @@ app.post('/newclient', async (req, res) => {
       },
       data: {
         name: Name,
-        email: emailContacts,
+        email: emailContacts || '',
         cpfCnpj: CNPJ || CPF,
         mobilePhone: userPhoneNumber
       }
