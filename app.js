@@ -661,7 +661,7 @@ app.post('/newclient', async (req, res) => {
         'content-type': 'application/json',
         access_token: process.env.ASAAS_ACCESS_KEY
       },
-      body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email, phone: userPhoneNumber})
+      body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email, mobilePhone: userPhoneNumber})
     };
 
     axios(url, options)
@@ -714,7 +714,7 @@ app.post('/updateclient', async (req, res) => {
           'content-type': 'application/json',
           access_token: process.env.ASAAS_ACCESS_KEY
         },
-        body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email, phone: userPhoneNumber})
+        body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email, mobilePhone: userPhoneNumber})
       };
       
       fetch(url, options)
