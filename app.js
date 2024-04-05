@@ -518,8 +518,8 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       // Verifique se há dados na resposta
       if (dealGet.data && dealGet.data.value && dealGet.data.value.length > 0) {
         const deals = dealGet.data.value;
-        parcelas = deals[0]['OtherProperties'][0].ObjectValueName
-        formaDePagamento = deals[0]['OtherProperties'][1].ObjectValueName.toUpperCase()
+        parcelas = deals[0]['OtherProperties'].find(deal => deal.FieldKey === 'deal_0CDE1351-1AE7-4EC6-BEC6-51B6D6103356').ObjectValueName;
+        formaDePagamento = deals[0]['OtherProperties'].find(deal => deal.FieldKey === 'deal_A856FC68-9D24-4D0F-99E4-E7553A97D4CF').ObjectValueName.toUpperCase();
 
         if (formaDePagamento === 'CARTÃO DE CRÉDITO') {
           formaDePagamento = 'CREDIT_CARD'

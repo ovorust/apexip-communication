@@ -3,42 +3,24 @@ const axios = require('axios');
 
 async function createInvoice() {
 
-  const Name = 'Empresa Teste'
-  const CNPJ = '32132131231231'
-  const Email = 'ovojogarust32@gmail.com'
+  const Title = 'Processo de Registro de uma Marca - Engetins'
 
-  const asaasCustomers = await axios.get(`https://sandbox.asaas.com/api/v3/customers?name=${Name}`, {
-    headers: {
-      accept: 'application/json',
-      access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoX2RlY2Y4OTZmLWE3Y2YtNGE2Mi1iN2NhLTM1Mzk3ZjU2NDY4Yw=='
-    }
-  });
+  const dealGet = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'&$select=OtherProperties`, {
+          headers: {
+              'Accept': 'application/json',
+              'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
+          }
+      });
 
-  const existingCustomer = asaasCustomers.data.data.find(customer => customer.name === Name);
-  console.log(existingCustomer)
+      // Verifique se há dados na resposta
+      if (dealGet.data && dealGet.data.value && dealGet.data.value.length > 0) {
+        const deals = dealGet.data.value;
+        parcelas = deals[0]['OtherProperties'].find(deal => deal.FieldKey === 'deal_0CDE1351-1AE7-4EC6-BEC6-51B6D6103356').ObjectValueName;
+        formaDePagamento = deals[0]['OtherProperties'].find(deal => deal.FieldKey === 'deal_A856FC68-9D24-4D0F-99E4-E7553A97D4CF').ObjectValueName.toUpperCase();
+      }
 
-  if (existingCustomer) {
-    const customerIdAsaas = existingCustomer.id;
-
-    // Atualizar cliente na Asaas
-    const url = `https://sandbox.asaas.com/api/v3/customers/${customerIdAsaas}`;
-    const options = {
-      method: 'PUT',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwNzY1NjY6OiRhYWNoX2RlY2Y4OTZmLWE3Y2YtNGE2Mi1iN2NhLTM1Mzk3ZjU2NDY4Yw=='
-      },
-      body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email})
-    };
-    
-    fetch(url, options)
-      .then(res => console.log('[/updateclient] Cliente atualizado na Asaas com sucesso!'))
-      .catch(err => console.error('[/updateclient] Erro ao atualizar cliente Asaas: ' + err));
-
-  } else {
-    console.log('[/updateclient] Cliente não encontrado na Asaas');
-  }
+      console.log(parcelas)
+      console.log(formaDePagamento)
   
 }
 
