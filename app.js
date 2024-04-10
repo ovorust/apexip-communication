@@ -704,6 +704,7 @@ const url = 'https://api.asaas.com/v3/customers';
 
     const paymentDueDateWarnings = notificacoesGet.data.data.filter(notification => notification.event === 'PAYMENT_DUEDATE_WARNING');
     const paymentOverdue = notificacoesGet.data.data.filter(notification => notification.event === 'PAYMENT_OVERDUE');
+    const paymentCreated = notificacoesGet.data.data.filter(notification => notification.event === 'PAYMENT_CREATED');
 
     const url_notifications = 'https://api.asaas.com/v3/notifications/batch';
     const options_notifications = {
@@ -736,7 +737,17 @@ const url = 'https://api.asaas.com/v3/customers';
             smsEnabledForCustomer: true,
             phoneCallEnabledForCustomer: false,
             whatsappEnabledForCustomer: false,
-          }
+          },
+          {
+            id: paymentCreated[0].id,
+            enabled: true,
+            emailEnabledForProvider: true,
+            smsEnabledForProvider: false,
+            emailEnabledForCustomer: true,
+            smsEnabledForCustomer: true,
+            phoneCallEnabledForCustomer: false,
+            whatsappEnabledForCustomer: false,
+          },
         ]
       })
     };
