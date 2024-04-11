@@ -465,7 +465,7 @@ let lastProcessedEvent = null; // Variável para armazenar o último evento proc
 
 app.post('/asaascriacaopagamento', async (req, res) => {
   try {
-    const { Title, PipelineId, StageId, ContactName, Amount } = req.body.New;
+    const { Title, PipelineId, StageId, ContactName, Amount, OriginDealId } = req.body.New;
     const oldStageId = req.body.Old.StageId
     let formaDePagamento;
     const STAGE_FECHAMENTO_DO_NEGOCIO = 10075648;
@@ -508,7 +508,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       }
     })
 
-    const dealGet = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'&$select=OtherProperties`, {
+    const dealGet = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Id+eq+${OriginDealId}&$select=OtherProperties`, {
           headers: {
               'Accept': 'application/json',
               'User-Key': process.env.PLOOMES_USER_KEY
@@ -526,7 +526,8 @@ app.post('/asaascriacaopagamento', async (req, res) => {
         } else if (formaDePagamento === undefined) {
           formaDePagamento = 'UNDEFINED'
         }
-
+        501252816
+        501252816
         
         if (parcelas === 'À vista (1x)' || parcelas === undefined) {
 

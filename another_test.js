@@ -5,7 +5,16 @@ const fetch = require('node-fetch');
 // Envolve o código em uma função assíncrona para poder usar await
 async function testFunction() {
 
+  const ContactName = 'Empresa Teste'
+
   const Title = 'Busca de Anterioridade de Patente'
+
+  const clienteGet = await axios.get(`https://api.asaas.com/v3/customers?name=${ContactName}`, {
+    headers: {
+      'Accept': 'application/json',
+      'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
+    }
+  })
 
   const dealGet = await axios.get(`https://api2.ploomes.com/Deals?$expand=OtherProperties&$filter=Title+eq+'${Title}'&$select=OtherProperties`, {
     headers: {
@@ -35,6 +44,9 @@ if (dealGet.data && dealGet.data.value && dealGet.data.value.length > 0) {
   } else {
     parcelas = parseInt(parcelas)
   }
+
+  const idCliente = clienteGet.data.data[0].id
+  console.log(idCliente)
 
 } else {
   console.log("[/asaascriacaopagamento] Nenhum dado de pagamento encontrado.");
