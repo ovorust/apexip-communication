@@ -396,8 +396,8 @@ app.post('/asaaspagamento', async (req, res) => {
     };
 
     if (event === "PAYMENT_CREATED") {
-      const nomeCardCobranca = ajustaDescricaoPagamento(payment.description)
-      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_COMERCIAL_NACIONAL} and Title eq '${nomeCardCobranca}'`, {
+      const idCardCobranca = ajustaDescricaoPagamento(payment.description)
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_COMERCIAL_NACIONAL} and Id eq ${idCardCobranca}`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
@@ -422,9 +422,9 @@ app.post('/asaaspagamento', async (req, res) => {
 
     if (event === "PAYMENT_RECEIVED") {
       console.log('[/asaaspagamento] Pagamento recebido');
-      const nomeCardCobranca = ajustaDescricaoPagamento(payment.description)
+      const idCardCobranca = ajustaDescricaoPagamento(payment.description)
 
-      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_COMERCIAL_NACIONAL} and Title eq '${nomeCardCobranca}'`, {
+      const response = await axios.get(`https://api2.ploomes.com/Deals?$filter=PipelineId eq ${PIPELINE_COMERCIAL_NACIONAL} and Id eq ${idCardCobranca}`, {
         headers: {
           'User-Key': process.env.PLOOMES_USER_KEY
         }
@@ -504,7 +504,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     const clienteGet = await axios.get(`https://api.asaas.com/v3/customers?name=${ContactName}`, {
       headers: {
         'Accept': 'application/json',
-        'access_token': process.env.ASAAS_ACCESS_KEY
+        'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
       }
     })
 
@@ -526,9 +526,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
         } else if (formaDePagamento === undefined) {
           formaDePagamento = 'UNDEFINED'
         }
-        501252816
-        501252816
-        
+
         if (parcelas === 'À vista (1x)' || parcelas === undefined) {
 
           parcelas = 0 // Deve ser 0 porque na Asaas 0 parcelas significa "À Vista"
@@ -547,7 +545,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
       billingType: formaDePagamento,
       customer: idCliente,
       value: Amount,
-      description: Title,
+      description: String(Id),
       installmentCount: parcelas,
       totalValue: Amount,
       dueDate: getCurrentDate(7)
@@ -583,7 +581,7 @@ app.post('/asaascriacaopagamento', async (req, res) => {
     const criarCobranca = await axios.post('https://api.asaas.com/v3/payments', data, {
       headers: {
         'Accept': 'application/json',
-        'access_token': process.env.ASAAS_ACCESS_KEY
+        'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
       }
     })
 
@@ -691,7 +689,7 @@ const url = 'https://api.asaas.com/v3/customers';
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
-      access_token: process.env.ASAAS_ACCESS_KEY
+      access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
     },
     data: {
       name: Name,
@@ -712,7 +710,7 @@ const url = 'https://api.asaas.com/v3/customers';
     const notificacoesGet = await axios.get(`https://api.asaas.com/v3/customers/${response.data.id}/notifications`, {
       headers: {
         'Accept': 'application/json',
-        'access_token': process.env.ASAAS_ACCESS_KEY
+        'access_token': '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
       }
     });
 
@@ -726,7 +724,7 @@ const url = 'https://api.asaas.com/v3/customers';
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        access_token: process.env.ASAAS_ACCESS_KEY
+        access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
       },
       body: JSON.stringify({
         customer: response.data.id,
@@ -821,7 +819,7 @@ app.post('/updateclient', async (req, res) => {
     const asaasCustomers = await axios.get(`https://api.asaas.com/v3/customers?name=${Name}`, {
       headers: {
         accept: 'application/json',
-        access_token: process.env.ASAAS_ACCESS_KEY
+        access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
       }
     });
 
@@ -837,7 +835,7 @@ app.post('/updateclient', async (req, res) => {
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          access_token: process.env.ASAAS_ACCESS_KEY
+          access_token: '$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAzNDY2MjU6OiRhYWNoXzIwMmJhNmVhLTJlODQtNGRkOS1hMGRkLWMzNWViMGNjZTAzZg=='
         },
         body: JSON.stringify({
           name: Name,
