@@ -808,7 +808,7 @@ app.post('/updateclient', async (req, res) => {
     const numeroEndereco = userPhones.data.value[0].StreetAddressNumber
     const bairro = userPhones.data.value[0].Neighborhood
     const complemento = userPhones.data.value[0].StreetAddressLine2
-    const CEP = userPhones.data.value[0].Zipcode
+    const CEP = userPhones.data.value[0].ZipCode
 
     console.log('CEP: ', CEP)
     console.log('Complemento: ', complemento)
