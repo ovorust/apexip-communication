@@ -45,16 +45,18 @@ app.post('/webhook', async (req, res) => {
     const personName = req.body.New.PersonName;
     const dealTitle = req.body.New.Title;
     const pipelineId = req.body.New.PipelineId;
-    const TEMPLATE = "notificacao_servicos"
+    let TEMPLATE = ""
     let FLOW = ""
 
-    // PIPELINE COMERCIAL: 10015005   FECHAMENTO DE NEGÓCIO (ÚLTIMO ESTÁGIO): 10075648
+    // Comercial (Clientes NACIONAIS): 10015005   FECHAMENTO DE NEGÓCIO (ÚLTIMO ESTÁGIO): 10075648
     // PIPELINE DE TESTE: 50000676    ETAPA 3 (ÚLTIMO ESTÁGIO): 50000676
-    // PIPELINE DE SERVIÇOS NACIONAIS: 10015007
+    // Serviços (Clientes NACIONAIS): 10015007
     if (pipelineId === 10015005) {
+      TEMPLATE = "notificacao_servicos"
       FLOW = "Notificação de atualização no estado do serviço";
     } else if (pipelineId === 10015007) {
-      FLOW = "Outro fluxo de notificação";
+      FLOW = "Notificação de atualização no estado do serviço nacional";
+      TEMPLATE = "notificacao_servicos_nacionais"
     } else {
       // Se for diferente desses dois pipelines, não fazer nada
       return res.status(200).send('Pipeline ID não corresponde. Nenhuma ação necessária.');
