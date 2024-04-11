@@ -809,6 +809,12 @@ app.post('/updateclient', async (req, res) => {
     const bairro = userPhones.data.value[0].Neighborhood
     const complemento = userPhones.data.value[0].StreetAddressLine2
     const CEP = userPhones.data.value[0].Zipcode
+
+    console.log('CEP: ', CEP)
+    console.log('Complemento: ', complemento)
+    console.log('Bairro: ', bairro)
+    console.log('Numero do Endereço: ', numeroEndereco)
+    console.log('Endereço: ', endereco)
   
     if (userPhones.data.value.length > 0 && userPhones.data.value[0].Phones && userPhones.data.value[0].Phones.length > 0) {
       userPhoneNumber = userPhones.data.value[0].Phones[0].SearchPhoneNumber.toString();
