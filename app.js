@@ -648,7 +648,7 @@ app.post('/newclient', async (req, res) => {
 
     let userPhoneNumber = '';
 
-    const userPhones = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name eq '${Name}'&$expand=Phones&$orderby=TypeId desc&$select=Phones`, {
+    const userPhones = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name eq '${Name}'&$expand=Phones&$orderby=TypeId desc`, {
       headers: {
         'User-Key': '4F0633BC71A6B3DC5A52750761C967274AE1F8753C2344CCEB854B60B7564C8780EAFCB0E3BB7AEFA00482ED5A02C4512973B9376262FD4E6C3CA6CC5969AC7E'
       }
@@ -660,13 +660,21 @@ app.post('/newclient', async (req, res) => {
       console.log('A lista de Phones está vazia ou o caminho está incorreto.');
     }
 
-    const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'&$select=Email`, {
+    const getContacts = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name+eq+'${Name}'`, {
       headers: {
         'User-Key': process.env.PLOOMES_USER_KEY
       }
     });
 
     const emailContacts = getContacts.data.value[0].Email
+    const endereco = getContacts.data.value[0].StreetAddress
+    const numeroEndereco = getContacts.data.value[0].StreetAddressNumber
+    const bairro = getContacts.data.value[0].Neighborhood
+    const complemento = getContacts.data.value[0].StreetAddressLine2
+    const CEP = getContacts.data.value[0].Zipcode
+    
+    
+    
 
     const customer = await stripe.customers.create({
       name: Name,
@@ -687,10 +695,15 @@ const url = 'https://api.asaas.com/v3/customers';
     },
     data: {
       name: Name,
-      email: emailContacts || '',
       cpfCnpj: CNPJ || CPF,
-      mobilePhone: userPhoneNumber
-    }
+      email: emailContacts || '',
+      mobilePhone: userPhoneNumber,
+      address: endereco,
+      addressNumber: numeroEndereco,
+      province: bairro,
+      complement: complemento,
+      postalCode: String(CEP),
+      }
   };
 
   try {
@@ -787,11 +800,17 @@ app.post('/updateclient', async (req, res) => {
 
     let userPhoneNumber = '';
 
-    const userPhones = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name eq '${Name}'&$expand=Phones&$orderby=TypeId desc&$select=Phones`, {
+    const userPhones = await axios.get(`https://api2.ploomes.com/Contacts?$filter=Name eq '${Name}'&$expand=Phones&$orderby=TypeId desc`, {
       headers: {
         'User-Key': process.env.PLOOMES_USER_KEY
       }
     });
+
+    const endereco = userPhones.data.value[0].StreetAddress
+    const numeroEndereco = userPhones.data.value[0].StreetAddressNumber
+    const bairro = userPhones.data.value[0].Neighborhood
+    const complemento = userPhones.data.value[0].StreetAddressLine2
+    const CEP = userPhones.data.value[0].Zipcode
   
     if (userPhones.data.value.length > 0 && userPhones.data.value[0].Phones && userPhones.data.value[0].Phones.length > 0) {
       userPhoneNumber = userPhones.data.value[0].Phones[0].SearchPhoneNumber.toString();
@@ -820,7 +839,16 @@ app.post('/updateclient', async (req, res) => {
           'content-type': 'application/json',
           access_token: process.env.ASAAS_ACCESS_KEY
         },
-        body: JSON.stringify({name: Name, cpfCnpj: CNPJ || CPF, email: Email, mobilePhone: userPhoneNumber})
+        body: JSON.stringify({
+          name: Name,
+          cpfCnpj: CNPJ || CPF,
+          email: Email,
+          mobilePhone: userPhoneNumber,
+          address: endereco,
+          addressNumber: numeroEndereco,
+          province: bairro,
+          complement: complemento,
+          postalCode: String(CEP)})
       };
       
       fetch(url, options)
