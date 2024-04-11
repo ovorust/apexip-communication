@@ -669,7 +669,7 @@ app.post('/newclient', async (req, res) => {
     const numeroEndereco = getContacts.data.value[0].StreetAddressNumber
     const bairro = getContacts.data.value[0].Neighborhood
     const complemento = getContacts.data.value[0].StreetAddressLine2
-    const CEP = getContacts.data.value[0].Zipcode
+    const CEP = getContacts.data.value[0].ZipCode
     
     
     
